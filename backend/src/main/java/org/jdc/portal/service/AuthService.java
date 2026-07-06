@@ -39,7 +39,7 @@ public class AuthService {
         return authMapper.toAuthResponse(savedStudent);
     }
 
-    public AuthResponse loginStudent(LoginRequest request){
+    public AuthResponse login(LoginRequest request){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.emailOrName(),request.password())
         );

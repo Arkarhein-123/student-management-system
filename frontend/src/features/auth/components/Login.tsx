@@ -4,11 +4,11 @@ import * as z from "zod";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FormInput from "@/components/ui/FormInput"; // 🎯 Your reusable component path
+import FormInput from "@/components/ui/FormInput"; 
 
 const loginSchema = z.object({
     email: z.string().min(1, "Email is required").email("Invalid email format"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;

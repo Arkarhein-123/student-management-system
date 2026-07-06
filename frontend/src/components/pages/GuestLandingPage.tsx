@@ -9,7 +9,7 @@ export default function GuestLandingPage() {
             <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-slate-50 text-slate-900 border-b border-slate-200/80">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none" />
 
-                <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24">
+                <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-5 lg:py-6">
                     <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                         {/* Left Copy Framework */}
                         <div className="lg:col-span-7 space-y-6 text-left">
@@ -32,7 +32,7 @@ export default function GuestLandingPage() {
 
                             <div className="flex flex-wrap gap-4 pt-4">
                                 <Link to="/register">
-                                    <Button className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-600/10 transition active:scale-98 cursor-pointer rounded-xl gap-2">
+                                    <Button className="h-12 px-8 bg-blue-600 hover:bg-white hover:text-blue-600 text-white font-bold text-sm shadow-md shadow-blue-600/10  transition-all ease-in-out active:scale-98 cursor-pointer rounded-xl gap-2">
                                         Start Learning <ArrowRight className="h-4 w-4" />
                                     </Button>
                                 </Link>
@@ -40,7 +40,7 @@ export default function GuestLandingPage() {
                                 <Link to="/login">
                                     <Button
                                         variant="outline"
-                                        className="h-12 px-8 border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm transition rounded-xl cursor-pointer shadow-xs"
+                                        className="h-12 px-8 border-slate-400 bg-white hover:bg-blue-600 hover:text-white text-blue-600 font-bold text-sm  transition-all ease-in-out rounded-xl cursor-pointer shadow-xs"
                                     >
                                         Student Login
                                     </Button>
@@ -50,7 +50,7 @@ export default function GuestLandingPage() {
 
                         {/* Right Clean Panel Metrics Dashboard */}
                         <div className="lg:col-span-5">
-                            <div className="rounded-3xl bg-slate-100 border border-slate-200 p-6 sm:p-8 shadow-xl relative group">
+                            <div className="rounded-3xl bg-slate-300 border border-slate-200 p-6 sm:p-8 shadow-xl relative group">
                                 <div className="grid grid-cols-2 gap-4 sm:gap-5">
                                     <div className="rounded-2xl bg-white border border-slate-200 p-5 transition duration-300 shadow-xs">
                                         <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center mb-3.5">
@@ -123,7 +123,7 @@ export default function GuestLandingPage() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div className="rounded-2xl border border-slate-200/80 bg-white p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-blue-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-blue-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <GraduationCap className="w-6 h-6" />
                             </div>
@@ -134,7 +134,7 @@ export default function GuestLandingPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200/80 bg-white p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-emerald-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-emerald-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <ShieldCheck className="w-6 h-6" />
                             </div>
@@ -145,7 +145,7 @@ export default function GuestLandingPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200/80 bg-white p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-purple-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-purple-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <Milestone className="w-6 h-6" />
                             </div>
