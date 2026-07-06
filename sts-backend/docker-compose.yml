@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0.46
+    container_name: spring-mysql-container
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jdc_sms_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # သင့်ရဲ့ init.sql ဖိုင်ကို container ထဲက script ဖတ်တဲ့နေရာနဲ့ ချိတ်ဆက်ထားခြင်း
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # 💡 MySQL လုံးဝ အဆင်သင့်ဖြစ်၊ မဖြစ် စစ်ဆေးပေးမယ့် Healthcheck
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  app:
+    build: .
+    container_name: spring-boot-app-container
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot က MySQL Container ကို လှမ်းချိတ်မယ့် URL
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jdc_sms_db?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    # 💡 MySQL က "Healthy" (အဆင်သင့်) ဖြစ်သွားပြီဆိုမှ Spring Boot ကို စဖွင့်ခိုင်းခြင်း
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
