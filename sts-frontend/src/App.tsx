@@ -1,8 +1,7 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
-import Guestlayout from "./components/layout/Guestlayout";
+import RootLayout from "./components/layout/RootLayout";
 import Login from "./features/auth/components/Login";
 import Register from "./features/auth/components/Register";
-import StudentDashboardLayout from "./components/layout/StudentDashboardLayout";
 import StudentDashboardHome from "./features/enrollments/pages/StudentDashboardHome";
 import StudentCourseCatalogPage from "./features/courses/pages/StudentCourseCatalogPage";
 import StudentEnrolledPrograms from "./features/enrollments/pages/StudentEnrolledPrograms";
@@ -11,24 +10,22 @@ import GuestLandingPage from "./components/pages/GuestLandingPage";
 
 const router = createBrowserRouter([
     {
-        element: <Guestlayout />,
+        // 🌐 One master layout to rule them all
+        element: <RootLayout />,
         children: [
+            // Public Pages
             { path: "/", element: <GuestLandingPage /> },
             { path: "/login", element: <Login /> },
             { path: "/register", element: <Register /> },
-        ],
-    },
-    {
-        element: <StudentDashboardLayout />,
-        children: [
+
+            // Student Pages
             { path: "/student", element: <StudentDashboardHome /> },
             { path: "/student/courses", element: <StudentCourseCatalogPage /> },
             { path: "/student/enrolled", element: <StudentEnrolledPrograms /> },
+
+            // User Settings
+            { path: "/profile", element: <UserProfileSettings /> },
         ],
-    },
-    {
-        path: "/profile",
-        element: <UserProfileSettings />,
     },
     {
         path: "*",

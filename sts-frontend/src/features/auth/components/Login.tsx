@@ -1,51 +1,96 @@
-import { useForm } from "react-hook-form";
+import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import z from "zod";
+import { authApi } from "../service/authApi";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FormInput from "@/components/ui/FormInput"; 
+import FormInput from "@/components/ui/FormInput";
 
 const loginSchema = z.object({
-    email: z.string().min(1, "Email is required").email("Invalid email format"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    emailOrName: z
+        .string()
+        .min(1, "Email is required")
+        .email("Provide a valid email format")
+        .max(150, "Email cannot exceed 150 characters"),
+    password: z
+        .string()
+        .min(8, "Password must be at least 8 characters")
+        .max(255, "Password cannot exceed 255 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
+    const navigate = useNavigate();
+    const setAuthSuccess = useAuthStore((state) => state.setAuthSuccess);
     const {
         register,
         handleSubmit,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
-        defaultValues: { email: "", password: "" },
+        defaultValues: {
+            emailOrName: "",
+            password: "",
+        },
     });
 
     const onSubmit = async (data: LoginFormValues) => {
-        console.log("Login Form Submitted Data:", data);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+            const userProfile = await authApi.login(data);
+            setAuthSuccess(userProfile);
+
+            if (userProfile.role === "ROLE_ADMIN") {
+                navigate("/admin");
+            } else if (userProfile.role === "ROLE_TEACHER") {
+                navigate("/teacher");
+            } else {
+                navigate("/student");
+            }
+        } catch (error: any) {
+            console.error("Authentication handshake breakdown:", error);
+
+            // Capture incorrect password / user not found scenarios cleanly
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                setError("root", {
+                    message: "Invalid credentials. Please double-check your identity data inputs.",
+                });
+            } else {
+                setError("root", {
+                    message: "Connection block. Server terminal appears offline.",
+                });
+            }
+        }
     };
 
     return (
-        <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+        <div className="flex min-h-[85vh] items-center justify-center px-4 py-12">
             <Card className="w-full max-w-md border border-slate-200/80 bg-white shadow-lg rounded-2xl">
                 <CardHeader className="space-y-1.5 text-center pb-6">
                     <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">Welcome Back</CardTitle>
                     <CardDescription className="text-sm text-muted-foreground">
-                        Welcome to JDC. Please sign in to your account.
+                        Access your academic operational workspace terminal.
                     </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-5">
+                    {/* Inline Error Warning Banner */}
+                    {errors.root && (
+                        <div className="p-3 bg-red-50 text-xs font-medium text-red-600 rounded-lg border border-red-100">
+                            {errors.root.message}
+                        </div>
+                    )}
+
                     {/* OAuth2 Panel */}
                     <div className="grid grid-cols-2 gap-3">
                         <Button
                             type="button"
                             variant="outline"
                             className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2"
-                            onClick={() => console.log("Initiating Google OAuth2...")}
+                            onClick={() => console.log("Google Login Context Call...")}
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24">
                                 <path
@@ -71,7 +116,7 @@ export default function Login() {
                             type="button"
                             variant="outline"
                             className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2"
-                            onClick={() => console.log("Initiating GitHub OAuth2...")}
+                            onClick={() => console.log("GitHub Login Context Call...")}
                         >
                             <svg className="h-4 w-4 fill-slate-800" viewBox="0 0 16 16">
                                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
@@ -82,54 +127,42 @@ export default function Login() {
 
                     <div className="relative flex items-center justify-center text-xs uppercase tracking-wider text-slate-400">
                         <div className="absolute w-full border-t border-slate-100"></div>
-                        <span className="relative bg-white px-3 z-10 font-medium">
-                            Or log in with security credentials
-                        </span>
+                        <span className="relative bg-white px-3 z-10 font-medium">Or deploy secure credentials</span>
                     </div>
 
-                    {/* Operational Credentials Form */}
+                    {/* Login Authentication Submission Form */}
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <FormInput
-                            label="Email Address"
-                            type="email"
-                            placeholder="name@domain.com"
-                            error={errors.email}
-                            {...register("email")}
+                            label="Email Address or Username"
+                            type="text"
+                            placeholder="name@domain.com or username"
+                            error={errors.emailOrName}
+                            {...register("emailOrName")}
                         />
 
-                        <div>
-                            <div className="relative">
-                                <FormInput
-                                    label="Password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    error={errors.password}
-                                    {...register("password")}
-                                />
-                                <a
-                                    href="#forgot"
-                                    className="absolute top-0 right-0 text-xs font-medium text-blue-600 hover:underline"
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
-                        </div>
+                        <FormInput
+                            label="Password"
+                            type="password"
+                            placeholder="••••••••"
+                            error={errors.password}
+                            {...register("password")}
+                        />
 
                         <Button
                             type="submit"
                             disabled={isSubmitting}
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm h-10 shadow-sm shadow-blue-500/10 rounded-md transition duration-150 mt-2 cursor-pointer"
                         >
-                            {isSubmitting ? "Logging Account..." : "Log In"}
+                            {isSubmitting ? "Authenticating Terminal..." : "Sign In to Portal"}
                         </Button>
                     </form>
                 </CardContent>
 
                 <CardFooter className="justify-center border-t border-slate-50 bg-slate-50/50 p-4 rounded-b-2xl">
                     <p className="text-xs text-slate-500">
-                        Not on JDC Learning?{" "}
+                        New applicant?{" "}
                         <Link to="/register" className="font-semibold text-blue-600 hover:underline">
-                            Sign Up
+                            Register Account
                         </Link>
                     </p>
                 </CardFooter>

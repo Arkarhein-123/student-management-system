@@ -25,7 +25,7 @@ export default function StudentCourseCatalogPage() {
     }
 
     return (
-        <div className="space-y-6 w-full">
+        <div className="space-y-6 w-full p-6">
             {/* Page Header Layout Section */}
             <div className="flex flex-col gap-1 border-b border-slate-200/60 pb-4">
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900">Available Programs</h1>
