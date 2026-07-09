@@ -14,21 +14,19 @@ import { useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import logo from "@/assets/img/jdc-logo.jpg";
 
-// 📋 Dynamic Navigation Lookup Configuration mapped to user roles
+// 📋 Dynamic Navigation Lookup Configuration mapped exactly to active router routes
 const ROLE_NAVIGATION = {
     ROLE_STUDENT: [
         { path: "/student", name: "Home Terminal", icon: LayoutDashboard },
-        { path: "/student/courses", name: "Explore Catalog", icon: BookOpen },
-        { path: "/student/enrolled", name: "Enrolled Courses", icon: GraduationCap },
+        { path: "/student/enrolled", name: "Registered Classrooms", icon: GraduationCap },
     ],
-    ROLE_TEACHER: [
-        { path: "/teacher/dashboard", name: "Teacher Terminal", icon: LayoutDashboard },
-        { path: "/teacher/courses", name: "Manage Courses", icon: BookOpen },
-    ],
+    ROLE_TEACHER: [{ path: "/teacher", name: "Teacher Terminal", icon: LayoutDashboard }],
     ROLE_ADMIN: [
-        { path: "/admin/dashboard", name: "Admin Console", icon: LayoutDashboard },
-        { path: "/admin/users", name: "Manage Roles", icon: UserCheck },
-        { path: "/admin/security", name: "System Guards", icon: ShieldAlert },
+        { path: "/admin", name: "Admin Dashboard", icon: LayoutDashboard },
+        { path: "/admin/courses", name: "Course Templates", icon: BookOpen },
+        { path: "/admin/batches", name: "Live Batches", icon: GraduationCap },
+        { path: "/admin/enrollments", name: "Enrollment Desk", icon: UserCheck },
+        { path: "/admin/users", name: "User Access Matrix", icon: ShieldAlert },
     ],
 };
 
@@ -45,11 +43,21 @@ export default function Navbar() {
     const activeLinks = (userRole && ROLE_NAVIGATION[userRole]) || [];
     const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "US";
 
+    // 🎯 Compute the perspective home landing pad based on user authentication state
+    const getHomeRoute = () => {
+        if (!isLoggedIn || !userRole) return "/";
+        if (userRole === "ROLE_STUDENT") return "/student";
+        if (userRole === "ROLE_TEACHER") return "/teacher";
+        if (userRole === "ROLE_ADMIN") return "/admin";
+        return "/";
+    };
+
     return (
         <header className="sticky top-0 z-50 h-16 bg-white border-b border-slate-200/80 shadow-sm flex items-center justify-between px-6 lg:px-12 w-full">
             {/* ─── LEFT SIDE: BRAND LOGO & DYNAMIC LINKS ─── */}
             <div className="flex items-center gap-8">
-                <Link to="/" className="flex items-center gap-2 group">
+                {/* 🔄 Dynamic Routing Link based on role */}
+                <Link to={getHomeRoute()} className="flex items-center gap-2 group">
                     <div className="w-8 h-8 rounded-lg bg-gray-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
                         <img src={logo} alt="jdc logo" className="w-full h-full object-cover" />
                     </div>
@@ -81,7 +89,7 @@ export default function Navbar() {
                 )}
             </div>
 
-            {/* ─── RIGHT SIDE: DYNAMIC ACTION ACTION PANEL ─── */}
+            {/* ─── RIGHT SIDE: DYNAMIC ACTION PANEL ─── */}
             <div className="flex items-center gap-3">
                 {!isLoggedIn ? (
                     // Anonymous Guest Interaction Controls

@@ -6,7 +6,7 @@ import z from "zod";
 import { authApi } from "../service/authApi";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FormInput from "@/components/ui/FormInput";
+import FormInput from "@/components/layout/FormInput";
 
 const loginSchema = z.object({
     emailOrName: z
