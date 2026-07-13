@@ -14,7 +14,6 @@ import { useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import logo from "@/assets/img/jdc-logo.jpg";
 
-// 📋 Dynamic Navigation Lookup Configuration mapped exactly to active router routes
 const ROLE_NAVIGATION = {
     ROLE_STUDENT: [
         { path: "/student", name: "Home Terminal", icon: LayoutDashboard },
@@ -43,7 +42,6 @@ export default function Navbar() {
     const activeLinks = (userRole && ROLE_NAVIGATION[userRole]) || [];
     const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "US";
 
-    // 🎯 Compute the perspective home landing pad based on user authentication state
     const getHomeRoute = () => {
         if (!isLoggedIn || !userRole) return "/";
         if (userRole === "ROLE_STUDENT") return "/student";

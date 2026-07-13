@@ -1,0 +1,101 @@
+import type { Course } from "@/types";
+import { useState } from "react";
+import { Search } from "lucide-react";
+
+interface CourseCatalogProps {
+    courses: Course[];
+}
+export default function CourseCatalog({ courses }: CourseCatalogProps) {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeCategory, setActiveCategory] = useState("All");
+
+    const categories = ["All", "Frontend", "Backend", "Fullstack", "UI/UX", "Data Science"];
+
+    const filteredCourses = courses.filter((course) => {
+        const matchesCategory =
+            activeCategory === "All" ||
+            course.category.toLocaleLowerCase().includes(activeCategory.toLocaleLowerCase());
+        const matchesSearch = course.courseName.toLowerCase().includes(searchQuery.toLocaleLowerCase());
+
+        return matchesCategory && matchesSearch;
+    });
+
+    return (
+        <div className="space-y-6">
+            {/* // filter and search bar section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4">
+                <h3 className="text-xl font-bold text-slate-800 tracking-tight">Available Classes</h3>
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                                    activeCategory === cat
+                                        ? "bg-blue-600 text-white shadow-xs"
+                                        : "text-slate-600 hover:text-slate-900"
+                                }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="relative min-w-[240px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search Catalog"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-1.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCourses.map((course) => (
+                    <div
+                        key={course.id}
+                        className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between"
+                    >
+                        <div>
+                            {/* Image Section */}
+                            <div className="aspect-video w-full bg-slate-50 overflow-hidden relative border-b border-slate-100">
+                                <img
+                                    src={course.imageUrl}
+                                    alt={course.courseName}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+
+                            {/* Course Meta Content */}
+                            <div className="p-5 space-y-2">
+                                <h4 className="text-base font-bold text-slate-900 line-clamp-1">{course.courseName}</h4>
+                                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                                    {course.description || "No description provided for this track."}
+                                </p>
+                                <div className="text-xs font-medium text-slate-400 pt-1">
+                                    Duration: {course.duration}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Price & Navigation Call to Action */}
+                        <div className="p-5 pt-0 space-y-3">
+                            <div className="text-lg font-extrabold text-blue-600">
+                                {/* Dynamically converting fees value to MMK format as shown in image */}
+                                {course.fees.toLocaleString()} MMK
+                            </div>
+                            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 flex items-center justify-center rounded-xl transition cursor-pointer shadow-xs">
+                                Course Details
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}

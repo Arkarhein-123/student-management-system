@@ -11,9 +11,21 @@ import FormInput from "@/components/layout/FormInput";
 const loginSchema = z.object({
     emailOrName: z
         .string()
-        .min(1, "Email is required")
-        .email("Provide a valid email format")
-        .max(150, "Email cannot exceed 150 characters"),
+        .min(1, "Email or Username is required")
+        .max(150, "Input cannot exceed 150 characters")
+        .refine(
+            (value) => {
+                // If it looks like they are trying to type an email (contains @), validate the format
+                if (value.includes("@")) {
+                    return z.string().email().safeParse(value).success;
+                }
+                // Otherwise, treat it as a standard username string (must be at least 3 chars, for example)
+                return value.trim().length >= 8;
+            },
+            {
+                message: "Provide a valid email format or a valid username (min 8 characters)",
+            },
+        ),
     password: z
         .string()
         .min(8, "Password must be at least 8 characters")

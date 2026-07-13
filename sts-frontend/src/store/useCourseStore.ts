@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import type { CourseResponse } from "../features/courses/services/CourseResponse";
 import { courseApi } from "../features/courses/services/courseApi";
+import type { Course } from "@/types";
 
 interface CourseState {
-    courses: CourseResponse[];
+    courses: Course[];
     loading: boolean;
     error: string | null;
     fetchCourses: () => Promise<void>;
@@ -17,7 +17,7 @@ export const useCourseStore = create<CourseState>((set) => ({
     fetchCourses: async () => {
         set({ loading: true, error: null });
         try {
-            const data = await courseApi.getAll();
+            const data = await courseApi.getAllCourses();
             set({ courses: data, loading: false, error: null });
         } catch (e: unknown) {
             if (e instanceof Error) {
