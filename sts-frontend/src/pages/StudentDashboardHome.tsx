@@ -50,7 +50,7 @@ export default function StudentDashboardHome() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
             <div className="space-y-1">
                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                    Welcome back, {username} <span className="animate-bounce">👋</span>
+                    Welcome, {username} <span className="animate-bounce">👋</span>
                 </h1>
                 <div className="flex items-center gap-3 text-xs font-semibold text-slate-500">
                     <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wide font-bold">

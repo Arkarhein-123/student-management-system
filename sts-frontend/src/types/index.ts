@@ -6,6 +6,7 @@ export interface Course {
     fees: number;
     category: string;
     imageUrl: string;
+    isAvailable: boolean;
 }
 
 export interface Batch {
@@ -21,8 +22,8 @@ export interface Batch {
 }
 
 export interface ActiveEnrollmentView {
-    courseName : string,
-    scheduleInfo : string,
-    format : string,
-    batchId : string
+    courseName: string;
+    scheduleInfo: string;
+    format: string;
+    batchId: string;
 }

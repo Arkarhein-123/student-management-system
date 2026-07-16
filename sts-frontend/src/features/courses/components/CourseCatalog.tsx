@@ -1,10 +1,11 @@
 import type { Course } from "@/types";
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Lock, ArrowRight } from "lucide-react";
 
 interface CourseCatalogProps {
     courses: Course[];
 }
+
 export default function CourseCatalog({ courses }: CourseCatalogProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState("All");
@@ -22,7 +23,7 @@ export default function CourseCatalog({ courses }: CourseCatalogProps) {
 
     return (
         <div className="space-y-6">
-            {/* // filter and search bar section */}
+            {/* Filter and search bar section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4">
                 <h3 className="text-xl font-bold text-slate-800 tracking-tight">Available Classes</h3>
 
@@ -55,11 +56,15 @@ export default function CourseCatalog({ courses }: CourseCatalogProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Catalog Grid Area */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCourses.map((course) => (
                     <div
                         key={course.id}
-                        className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between"
+                        className={`bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between relative ${
+                            !course.isAvailable ? "opacity-90 shadow-none border-dashed" : ""
+                        }`}
                     >
                         <div>
                             {/* Image Section */}
@@ -67,8 +72,23 @@ export default function CourseCatalog({ courses }: CourseCatalogProps) {
                                 <img
                                     src={course.imageUrl}
                                     alt={course.courseName}
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover transition duration-300 ${
+                                        !course.isAvailable ? "grayscale filter contrast-75 brightness-95" : ""
+                                    }`}
                                 />
+
+                                {/* Absolute Badges Container */}
+                                <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+                                    <span className="bg-slate-900/85 backdrop-blur-xs text-white text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                        {course.category}
+                                    </span>
+
+                                    {!course.isAvailable && (
+                                        <span className="bg-amber-500 text-slate-950 text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-md shadow-xs border border-amber-400 animate-pulse">
+                                            Coming Soon ⏳
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Course Meta Content */}
@@ -86,12 +106,23 @@ export default function CourseCatalog({ courses }: CourseCatalogProps) {
                         {/* Price & Navigation Call to Action */}
                         <div className="p-5 pt-0 space-y-3">
                             <div className="text-lg font-extrabold text-blue-600">
-                                {/* Dynamically converting fees value to MMK format as shown in image */}
                                 {course.fees.toLocaleString()} MMK
                             </div>
-                            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 flex items-center justify-center rounded-xl transition cursor-pointer shadow-xs">
-                                Course Details
-                            </button>
+
+                            {course.isAvailable ? (
+                                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 flex items-center justify-center gap-1.5 rounded-xl transition cursor-pointer shadow-xs group">
+                                    Course Details
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                                </button>
+                            ) : (
+                                <button
+                                    disabled
+                                    className="w-full bg-slate-100 border border-slate-200 text-slate-400 font-bold text-xs h-10 flex items-center justify-center gap-1.5 rounded-xl cursor-not-allowed"
+                                >
+                                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                                    No Active Batches
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
