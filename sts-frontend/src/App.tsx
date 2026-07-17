@@ -26,6 +26,7 @@ import AdminManageBatchesPage from "./features/batches/pages/AdminManageBatchesP
 import AdminManageEnrollmentsPage from "./features/enrollments/pages/AdminManageEnrollmentsPage";
 import AdminManageUsersPage from "./features/auth/pages/AdminManageUsersPage";
 import StudentCourseDetailsPage from "./features/courses/pages/StudentCourseDetailsPage";
+import StudentPaymentPage from "./features/payment/StudentPaymentPage";
 
 // --- 🛡️ SECURE ROLE-GUARD WRAPPER COMPONENT ---
 interface GuardProps {
@@ -92,7 +93,8 @@ const router = createBrowserRouter([
                     { path: "/student", element: <StudentDashboardHome /> },
                     { path: "/student/courses/:id", element: <StudentCourseDetailsPage /> },
                     { path: "/student/enrolled", element: <StudentEnrolledTracksPage /> },
-                    { path: "/student/workspace/:batchId", element: <StudentWorkspaceTerminalPage /> },
+                    { path: "/student/enrolled/:batchId", element: <StudentWorkspaceTerminalPage /> },
+                    { path: "/student/payment/", element: <StudentPaymentPage /> },
                 ],
             },
 

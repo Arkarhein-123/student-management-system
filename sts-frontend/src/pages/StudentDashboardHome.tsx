@@ -1,11 +1,12 @@
 import CourseCatalog from "@/features/courses/components/CourseCatalog";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCourseStore } from "@/store/useCourseStore";
-import type { Course } from "@/types";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function StudentDashboardHome() {
+    const navigate = useNavigate();
     const { user } = useAuthStore();
     const username = user?.name || "Anonymous User";
 
@@ -60,7 +61,7 @@ export default function StudentDashboardHome() {
                 </div>
             </div>
 
-            <CourseCatalog courses={courses} />
+            <CourseCatalog courses={courses} onViewDetails={(courseId) => navigate(`/student/courses/${courseId}`)} />
         </div>
     );
 }

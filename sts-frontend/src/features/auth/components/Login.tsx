@@ -15,11 +15,9 @@ const loginSchema = z.object({
         .max(150, "Input cannot exceed 150 characters")
         .refine(
             (value) => {
-                // If it looks like they are trying to type an email (contains @), validate the format
                 if (value.includes("@")) {
                     return z.string().email().safeParse(value).success;
                 }
-                // Otherwise, treat it as a standard username string (must be at least 3 chars, for example)
                 return value.trim().length >= 8;
             },
             {
@@ -52,12 +50,12 @@ export default function Login() {
 
     const onSubmit = async (data: LoginFormValues) => {
         try {
-            const userProfile = await authApi.login(data);
-            setAuthSuccess(userProfile);
+            const authResponse = await authApi.login(data); // ◄ Returns token + profile data
+            setAuthSuccess(authResponse); // ◄ Saves both to Zustand storage
 
-            if (userProfile.role === "ROLE_ADMIN") {
+            if (authResponse.role === "ROLE_ADMIN") {
                 navigate("/admin");
-            } else if (userProfile.role === "ROLE_TEACHER") {
+            } else if (authResponse.role === "ROLE_TEACHER") {
                 navigate("/teacher");
             } else {
                 navigate("/student");
@@ -65,7 +63,6 @@ export default function Login() {
         } catch (error: any) {
             console.error("Authentication handshake breakdown:", error);
 
-            // Capture incorrect password / user not found scenarios cleanly
             if (error.response?.status === 401 || error.response?.status === 403) {
                 setError("root", {
                     message: "Invalid credentials. Please double-check your identity data inputs.",
@@ -89,19 +86,17 @@ export default function Login() {
                 </CardHeader>
 
                 <CardContent className="space-y-5">
-                    {/* Inline Error Warning Banner */}
                     {errors.root && (
                         <div className="p-3 bg-red-50 text-xs font-medium text-red-600 rounded-lg border border-red-100">
                             {errors.root.message}
                         </div>
                     )}
 
-                    {/* OAuth2 Panel */}
                     <div className="grid grid-cols-2 gap-3">
                         <Button
                             type="button"
                             variant="outline"
-                            className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2"
+                            className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2 cursor-pointer"
                             onClick={() => console.log("Google Login Context Call...")}
                         >
                             <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -127,7 +122,7 @@ export default function Login() {
                         <Button
                             type="button"
                             variant="outline"
-                            className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2"
+                            className="w-full border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs h-10 flex items-center justify-center gap-2 cursor-pointer"
                             onClick={() => console.log("GitHub Login Context Call...")}
                         >
                             <svg className="h-4 w-4 fill-slate-800" viewBox="0 0 16 16">
@@ -142,7 +137,6 @@ export default function Login() {
                         <span className="relative bg-white px-3 z-10 font-medium">Or deploy secure credentials</span>
                     </div>
 
-                    {/* Login Authentication Submission Form */}
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <FormInput
                             label="Email Address or Username"

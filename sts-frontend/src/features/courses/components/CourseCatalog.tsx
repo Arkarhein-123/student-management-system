@@ -4,9 +4,10 @@ import { Search, Lock, ArrowRight } from "lucide-react";
 
 interface CourseCatalogProps {
     courses: Course[];
+    onViewDetails: (courseId: number) => void;
 }
 
-export default function CourseCatalog({ courses }: CourseCatalogProps) {
+export default function CourseCatalog({ courses, onViewDetails }: CourseCatalogProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState("All");
 
@@ -110,7 +111,10 @@ export default function CourseCatalog({ courses }: CourseCatalogProps) {
                             </div>
 
                             {course.isAvailable ? (
-                                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 flex items-center justify-center gap-1.5 rounded-xl transition cursor-pointer shadow-xs group">
+                                <button
+                                    onClick={() => onViewDetails(course.id)}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 flex items-center justify-center gap-1.5 rounded-xl transition cursor-pointer shadow-xs group"
+                                >
                                     Course Details
                                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                                 </button>
