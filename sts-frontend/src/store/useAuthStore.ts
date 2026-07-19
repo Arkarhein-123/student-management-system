@@ -4,28 +4,31 @@ import { persist } from "zustand/middleware";
 export type UserRole = "ROLE_STUDENT" | "ROLE_TEACHER" | "ROLE_ADMIN";
 
 export interface UserProfile {
+    id: number; 
     name: string;
     email: string;
     role: UserRole;
 }
 
-// Exactly what the backend returns on successful login
+// Matches your backend org.jdc.portal.dto.response.AuthResponse structure
 export interface AuthResponse {
+    id: number; 
     token: string;
     name: string;
     email: string;
     role: UserRole;
+    isLoggedIn: boolean;
 }
 
 interface AuthState {
     user: UserProfile | null;
-    token: string | null; // ◄ Added to store JWT separately
+    token: string | null;
     userRole: UserRole | null;
     isLoggedIn: boolean;
     isLoading: boolean;
     error: string | null;
 
-    setAuthSuccess: (authData: AuthResponse) => void; // ◄ Changed from UserProfile to AuthResponse
+    setAuthSuccess: (authData: AuthResponse) => void;
     setAuthFailure: (errorMessage: string) => void;
     logout: () => void;
     clearError: () => void;
@@ -44,13 +47,14 @@ export const useAuthStore = create<AuthState>()(
             setAuthSuccess: (authData: AuthResponse) =>
                 set({
                     user: {
+                        id: authData.id, 
                         name: authData.name,
                         email: authData.email,
                         role: authData.role,
                     },
-                    token: authData.token, // ◄ Saves JWT token
+                    token: authData.token,
                     userRole: authData.role,
-                    isLoggedIn: true,
+                    isLoggedIn: authData.isLoggedIn,
                     isLoading: false,
                     error: null,
                 }),
@@ -78,13 +82,13 @@ export const useAuthStore = create<AuthState>()(
             clearError: () => set({ error: null }),
         }),
         {
-            name: "jdc-auth-storage", // Key name in localStorage
+            name: "jdc-auth-storage",
             partialize: (state) => ({
                 user: state.user,
                 token: state.token,
                 userRole: state.userRole,
                 isLoggedIn: state.isLoggedIn,
-            }), // Only persist these essential fields
+            }),
         },
     ),
 );
