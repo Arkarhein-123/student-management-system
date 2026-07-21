@@ -25,7 +25,7 @@ export interface ActiveEnrollmentView {
     courseName: string;
     scheduleInfo: string;
     format: string;
-    batchId: number; 
+    batchId: number;
 }
 
 export interface BatchDetails {
@@ -50,4 +50,27 @@ export interface CourseDetails {
     category: string;
     imageUrl: string;
     batches: BatchDetails[];
+}
+
+
+// lesson dto
+export interface Lesson {
+    id: number;
+    title: string;
+    moduleName: string;
+    recordingUrl: string | null;
+    materialUrl: string | null;
+    publishDate: string;
+}
+
+export interface ClassroomDetailResponse {
+    batchId: number;
+    batchCode: string;
+    courseTitle: string;
+    startDate: string;
+    scheduleInfo: string;
+    format: string;
+    cohortLevel: string;
+    teacherName: string;
+    lessons: Lesson[];
 }

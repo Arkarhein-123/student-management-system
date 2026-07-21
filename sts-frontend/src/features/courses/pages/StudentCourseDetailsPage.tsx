@@ -51,7 +51,8 @@ export default function StudentCourseDetailsPage() {
             });
         } else if (activeBatch.studentEnrollmentStatus === "APPROVED") {
             // Redirect to active classroom workspace
-            navigate(`/student/enrolled/${selectedBatchId}`);
+            // /student/classroom/:batchId
+            navigate(`/student/classroom/${selectedBatchId}`);
         }
     };
 

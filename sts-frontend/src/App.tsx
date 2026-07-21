@@ -13,7 +13,6 @@ import UserProfileSettings from "./features/auth/pages/UserProfileSettings";
 // 🧑‍🎓 Student Workspace Pages
 import StudentDashboardHome from "./pages/StudentDashboardHome";
 import StudentEnrolledTracksPage from "./features/enrollments/pages/StudentEnrolledTracksPage";
-import StudentWorkspaceTerminalPage from "./features/batches/pages/StudentWorkspaceTerminalPage";
 
 // 🧑‍🏫 Teacher Workspace Pages
 import TeacherDashboardHome from "./pages/TeacherDashboardHome";
@@ -27,6 +26,7 @@ import AdminManageEnrollmentsPage from "./features/enrollments/pages/AdminManage
 import AdminManageUsersPage from "./features/auth/pages/AdminManageUsersPage";
 import StudentCourseDetailsPage from "./features/courses/pages/StudentCourseDetailsPage";
 import StudentPaymentPage from "./features/payment/StudentPaymentPage";
+import ClassroomHubPage from "./features/classroom/pages/ClassroomHubPage";
 
 // --- 🛡️ SECURE ROLE-GUARD WRAPPER COMPONENT ---
 interface GuardProps {
@@ -93,7 +93,7 @@ const router = createBrowserRouter([
                     { path: "/student", element: <StudentDashboardHome /> },
                     { path: "/student/courses/:id", element: <StudentCourseDetailsPage /> },
                     { path: "/student/enrolled", element: <StudentEnrolledTracksPage /> },
-                    { path: "/student/enrolled/:batchId", element: <StudentWorkspaceTerminalPage /> },
+                    { path: "/student/classroom/:batchId", element: <ClassroomHubPage /> },
                     { path: "/student/payment/", element: <StudentPaymentPage /> },
                 ],
             },
