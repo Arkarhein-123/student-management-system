@@ -25,7 +25,7 @@ import AdminManageBatchesPage from "./features/batches/pages/AdminManageBatchesP
 import AdminManageEnrollmentsPage from "./features/enrollments/pages/AdminManageEnrollmentsPage";
 import AdminManageUsersPage from "./features/auth/pages/AdminManageUsersPage";
 import StudentCourseDetailsPage from "./features/courses/pages/StudentCourseDetailsPage";
-import StudentPaymentPage from "./features/payment/StudentPaymentPage";
+import StudentPaymentPage from "./features/payment/pages/StudentPaymentPage";
 import ClassroomHubPage from "./features/classroom/pages/ClassroomHubPage";
 
 // --- 🛡️ SECURE ROLE-GUARD WRAPPER COMPONENT ---

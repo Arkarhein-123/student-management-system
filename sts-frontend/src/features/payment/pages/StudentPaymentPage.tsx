@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCourseStore } from "@/store/useCourseStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { uploadReceiptImage } from "@/utils/supabaseStorage";
 import { Copy, UploadCloud, CheckCircle, Shield, Clock, HeartHandshake, ArrowLeft } from "lucide-react";
+import { paymentApi } from "../services/paymentApi";
 
 export default function StudentPaymentPage() {
     const location = useLocation();
@@ -26,6 +28,7 @@ export default function StudentPaymentPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!paymentState) {
@@ -58,6 +61,8 @@ export default function StudentPaymentPage() {
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(null);
+
         if (!selectedFile) {
             alert("Please upload your payment screenshot to proceed.");
             return;
@@ -66,17 +71,22 @@ export default function StudentPaymentPage() {
         try {
             setIsSubmitting(true);
 
-            // Since backend currently handles enrollment directly (and has no payment entity),
-            // we fire your existing enrollment trigger logic here.
-            alert(`Payment submitted! Creating enrollment request for ${batchCode}...`);
+            // 1. Upload receipt to Supabase "payment-image" bucket
+            const slipImageUrl = await uploadReceiptImage(selectedFile, "payment-image");
 
-            // Refresh details so UI components recognize state changes
+            // 2. Delegate submission to paymentApi service
+            await paymentApi.submitPayment({
+                batchId,
+                remarks: remarks.trim() || undefined,
+                slipImageUrl,
+            });
+
+            // 3. Refresh course details in store & redirect back to course view
             await fetchCourseDetails(courseId, studentId);
-
-            // Redirect back to dashboard details
             navigate(`/student/courses/${courseId}`);
         } catch (error: any) {
-            alert(error?.message || "Failed to submit enrollment request.");
+            const msg = error?.response?.data?.message || error?.message || "Failed to submit payment request.";
+            setErrorMessage(msg);
         } finally {
             setIsSubmitting(false);
         }
@@ -112,7 +122,7 @@ export default function StudentPaymentPage() {
                                 Current Enrollment
                             </span>
                             <h3 className="text-lg font-bold text-slate-900 leading-tight">{courseName}</h3>
-                            <p className="text-xs text-slate-500 font-medium">Course ID: {batchCode}</p>
+                            <p className="text-xs text-slate-500 font-medium">Batch Code: {batchCode}</p>
                         </div>
 
                         <div className="border-t border-slate-200/60 pt-4 flex items-center justify-between">
@@ -141,6 +151,7 @@ export default function StudentPaymentPage() {
                                     </p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleCopy("123-456-7890123456", "kbz")}
                                     className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer"
                                 >
@@ -161,12 +172,13 @@ export default function StudentPaymentPage() {
                                             Transfer
                                         </span>
                                     </div>
-                                    <p className="text-xs text-slate-600 font-semibold">JDC Academy Academy</p>
+                                    <p className="text-xs text-slate-600 font-semibold">JDC Academy</p>
                                     <p className="text-[11px] text-slate-500 font-mono font-medium">
                                         987-654-3210987654
                                     </p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleCopy("987-654-3210987654", "cb")}
                                     className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer"
                                 >
@@ -193,6 +205,7 @@ export default function StudentPaymentPage() {
                                     </p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleCopy("payments@jdcacademy.com", "paypal")}
                                     className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer"
                                 >
@@ -207,7 +220,7 @@ export default function StudentPaymentPage() {
                     </div>
                 </div>
 
-                {/* Right Column: Submission Form (2x wide) */}
+                {/* Right Column: Submission Form */}
                 <div className="lg:col-span-2 space-y-6">
                     <form
                         onSubmit={handleFormSubmit}
@@ -216,6 +229,12 @@ export default function StudentPaymentPage() {
                         <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
                             Payment Submission Form
                         </h2>
+
+                        {errorMessage && (
+                            <div className="p-3 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl">
+                                {errorMessage}
+                            </div>
+                        )}
 
                         {/* Additional Remarks Field */}
                         <div className="space-y-2">
@@ -238,8 +257,9 @@ export default function StudentPaymentPage() {
 
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition hover:bg-slate-50/50
-                                    ${selectedFile ? "border-emerald-300 bg-emerald-50/10" : "border-slate-200"}`}
+                                className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition hover:bg-slate-50/50 ${
+                                    selectedFile ? "border-emerald-300 bg-emerald-50/10" : "border-slate-200"
+                                }`}
                             >
                                 <input
                                     type="file"
@@ -283,12 +303,12 @@ export default function StudentPaymentPage() {
                                 disabled={isSubmitting}
                                 className="w-full sm:w-auto sm:ml-auto px-8 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-2xs cursor-pointer disabled:opacity-50"
                             >
-                                {isSubmitting ? "Processing..." : "Submit Payment"}
+                                {isSubmitting ? "Uploading & Submitting..." : "Submit Payment"}
                             </button>
                         </div>
                     </form>
 
-                    {/* Visual Badges (Row of 3) */}
+                    {/* Visual Badges */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl flex items-center gap-3">
                             <Shield className="w-5 h-5 text-blue-500 shrink-0" />

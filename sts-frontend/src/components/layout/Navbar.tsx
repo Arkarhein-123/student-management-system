@@ -1,32 +1,16 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-    LayoutDashboard,
-    BookOpen,
-    GraduationCap,
-    ShieldAlert,
-    UserCheck,
-    User,
-    LogOut,
-    Award,
-    ChevronDown,
-} from "lucide-react";
 import { useState } from "react";
-import { useAuthStore } from "../../store/useAuthStore";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, GraduationCap, User, LogOut, Award, ChevronDown } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
 import logo from "@/assets/img/jdc-logo.jpg";
 
-const ROLE_NAVIGATION = {
+// Navigation links for non-admin roles (Admin links are rendered in AdminSidebar)
+const ROLE_NAVIGATION: Record<string, Array<{ path: string; name: string; icon: any }>> = {
     ROLE_STUDENT: [
         { path: "/student", name: "Home Terminal", icon: LayoutDashboard },
         { path: "/student/enrolled", name: "Registered Classrooms", icon: GraduationCap },
     ],
     ROLE_TEACHER: [{ path: "/teacher", name: "Teacher Terminal", icon: LayoutDashboard }],
-    ROLE_ADMIN: [
-        { path: "/admin", name: "Admin Dashboard", icon: LayoutDashboard },
-        { path: "/admin/courses", name: "Course Templates", icon: BookOpen },
-        { path: "/admin/batches", name: "Live Batches", icon: GraduationCap },
-        { path: "/admin/enrollments", name: "Enrollment Desk", icon: UserCheck },
-        { path: "/admin/users", name: "User Access Matrix", icon: ShieldAlert },
-    ],
 };
 
 export default function Navbar() {
@@ -51,18 +35,18 @@ export default function Navbar() {
     };
 
     return (
-        <header className="sticky top-0 z-50 h-16 bg-white border-b border-slate-200/80 shadow-sm flex items-center justify-between px-6 lg:px-12 w-full">
+        <header className="sticky top-0 z-50 h-16 bg-white border-b border-slate-200/80 shadow-2xs flex items-center justify-between px-6 lg:px-12 w-full">
             {/* ─── LEFT SIDE: BRAND LOGO & DYNAMIC LINKS ─── */}
             <div className="flex items-center gap-8">
-                {/* 🔄 Dynamic Routing Link based on role */}
-                <Link to={getHomeRoute()} className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-lg bg-gray-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
-                        <img src={logo} alt="jdc logo" className="w-full h-full object-cover" />
+                {/* Dynamic Routing Link based on active user role */}
+                <Link to={getHomeRoute()} className="flex items-center gap-2.5 group">
+                    <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+                        <img src={logo} alt="JDC Academy Logo" className="w-full h-full object-cover" />
                     </div>
                     <span className="text-lg font-black tracking-tight text-slate-900 uppercase">JDC Academy</span>
                 </Link>
 
-                {/* Desktop Dynamic Navigation Links (Only displays if authenticated) */}
+                {/* Desktop Dynamic Navigation Links (Student / Teacher only) */}
                 {isLoggedIn && activeLinks.length > 0 && (
                     <nav className="hidden md:flex items-center gap-1">
                         {activeLinks.map((link) => {
@@ -90,7 +74,7 @@ export default function Navbar() {
             {/* ─── RIGHT SIDE: DYNAMIC ACTION PANEL ─── */}
             <div className="flex items-center gap-3">
                 {!isLoggedIn ? (
-                    // Anonymous Guest Interaction Controls
+                    /* Anonymous Guest Interaction Controls */
                     <>
                         <Link
                             to="/login"
@@ -100,41 +84,49 @@ export default function Navbar() {
                         </Link>
                         <Link
                             to="/register"
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 h-9 flex items-center justify-center rounded-lg shadow-xs transition active:scale-98"
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 h-9 flex items-center justify-center rounded-lg shadow-2xs transition active:scale-98"
                         >
                             Join For Free
                         </Link>
                     </>
                 ) : (
-                    // Secure Authenticated Account Dropdown Control Trigger
+                    /* Authenticated User Profile Dropdown */
                     <div className="relative">
                         <button
+                            type="button"
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50/80 transition duration-150 cursor-pointer group select-none"
                         >
-                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs group-hover:scale-105 transition-transform">
                                 {userInitials}
                             </div>
                             <span className="hidden sm:inline text-sm font-medium text-slate-700">
                                 {user?.name || "User Terminal"}
                             </span>
                             <ChevronDown
-                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                                    isDropdownOpen ? "rotate-180" : ""
+                                }`}
                             />
                         </button>
 
-                        {/* Profile Utility Dropdown Menu Overlays */}
+                        {/* Profile Dropdown Overlay */}
                         {isDropdownOpen && (
                             <>
-                                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)}></div>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
                                 <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 shadow-xl rounded-xl py-2 z-20 origin-top-right transition animate-in fade-in slide-in-from-top-1 duration-150">
                                     <div className="px-4 py-2 border-b border-slate-100">
-                                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-                                            Logged In As:
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                            Logged In As
                                         </p>
                                         <p className="text-sm font-semibold text-slate-800 truncate">
                                             {user?.name || "Active Session"}
                                         </p>
+                                        {userRole && (
+                                            <span className="inline-block mt-1 text-[9px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded uppercase">
+                                                {userRole.replace("ROLE_", "")}
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="p-1.5 space-y-0.5">
@@ -156,12 +148,13 @@ export default function Navbar() {
 
                                     <div className="border-t border-slate-100 p-1.5 mt-1">
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 setIsDropdownOpen(false);
                                                 logout();
                                                 navigate("/", { replace: true });
                                             }}
-                                            className="w-full flex items-center gap-3 px-3 h-10 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition duration-150 text-left cursor-pointer"
+                                            className="w-full flex items-center gap-3 px-3 h-10 text-sm font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition duration-150 text-left cursor-pointer"
                                         >
                                             <LogOut className="w-4 h-4" /> Logout
                                         </button>
