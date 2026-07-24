@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 export const createUserSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().min(1, "Email is required").email("Invalid email format"),
-    role: z.enum(["ROLE_STUDENT", "ROLE_TEACHER", "ROLE_ADMIN"], {
-        message: "Role is required",
-    }),
+    name: z.string().min(8, "Name must be at least 8 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    role: z.enum(["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_STUDENT"]),
 });
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;
