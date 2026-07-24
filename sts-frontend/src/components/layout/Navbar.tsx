@@ -137,13 +137,17 @@ export default function Navbar() {
                                         >
                                             <User className="w-4 h-4 text-slate-400" /> Account Details
                                         </Link>
-                                        <Link
-                                            to="/certificates"
-                                            onClick={() => setIsDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-3 h-10 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition duration-150"
-                                        >
-                                            <Award className="w-4 h-4 text-slate-400" /> My Certificates
-                                        </Link>
+
+                                        {/* Rendered conditionally for students only */}
+                                        {userRole === "ROLE_STUDENT" && (
+                                            <Link
+                                                to="/certificates"
+                                                onClick={() => setIsDropdownOpen(false)}
+                                                className="flex items-center gap-3 px-3 h-10 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition duration-150"
+                                            >
+                                                <Award className="w-4 h-4 text-slate-400" /> My Certificates
+                                            </Link>
+                                        )}
                                     </div>
 
                                     <div className="border-t border-slate-100 p-1.5 mt-1">

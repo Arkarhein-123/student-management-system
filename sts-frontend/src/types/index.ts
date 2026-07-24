@@ -9,6 +9,15 @@ export interface Course {
     isAvailable: boolean;
 }
 
+export interface CourseCreateRequest {
+    courseName: string;
+    description: string;
+    duration: string;
+    fees: number;
+    category: string;
+    imageUrl: string;
+}
+
 export interface Batch {
     id: number;
     batchCode: string;
