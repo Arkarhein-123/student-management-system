@@ -13,6 +13,9 @@ import UserProfileSettings from "./features/auth/pages/UserProfileSettings";
 // 🧑‍🎓 Student Workspace Pages
 import StudentDashboardHome from "./pages/StudentDashboardHome";
 import StudentEnrolledTracksPage from "./features/enrollments/pages/StudentEnrolledTracksPage";
+import StudentCourseDetailsPage from "./features/courses/pages/StudentCourseDetailsPage";
+import StudentPaymentPage from "./features/payment/pages/StudentPaymentPage";
+import ClassroomHubPage from "./features/classroom/pages/ClassroomHubPage";
 
 // 🧑‍🏫 Teacher Workspace Pages
 import TeacherDashboardHome from "./pages/TeacherDashboardHome";
@@ -23,10 +26,22 @@ import AdminDashboardHome from "./pages/AdminDashboardHome";
 import AdminManageCoursesPage from "./features/courses/pages/AdminManageCoursesPage";
 import AdminManageBatchesPage from "./features/batches/pages/AdminManageBatchesPage";
 import AdminManageEnrollmentsPage from "./features/enrollments/pages/AdminManageEnrollmentsPage";
-import AdminManageUsersPage from "./features/auth/pages/AdminManageUsersPage";
-import StudentCourseDetailsPage from "./features/courses/pages/StudentCourseDetailsPage";
-import StudentPaymentPage from "./features/payment/pages/StudentPaymentPage";
-import ClassroomHubPage from "./features/classroom/pages/ClassroomHubPage";
+import { AdminManageUsersPage } from "./features/auth/pages/AdminManageUsersPage";
+
+// --- 🏠 SMART ROOT INDEX COMPONENT ---
+// Redirects authenticated users to their home workspace, or renders Guest page for guests
+function RootIndex() {
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const userRole = useAuthStore((state) => state.userRole);
+
+    if (isLoggedIn) {
+        if (userRole === "ROLE_STUDENT") return <Navigate to="/student" replace />;
+        if (userRole === "ROLE_TEACHER") return <Navigate to="/teacher" replace />;
+        if (userRole === "ROLE_ADMIN") return <Navigate to="/admin" replace />;
+    }
+
+    return <GuestLandingPage />;
+}
 
 // --- 🛡️ SECURE ROLE-GUARD WRAPPER COMPONENT ---
 interface GuardProps {
@@ -66,8 +81,8 @@ const router = createBrowserRouter([
     {
         element: <RootLayout />,
         children: [
-            // 🌐 Public Routes open to all guests
-            { path: "/", element: <GuestLandingPage /> },
+            // 🌐 Public Routes open to all guests (RootIndex handles guest vs logged-in navigation)
+            { path: "/", element: <RootIndex /> },
             { path: "/profile", element: <UserProfileSettings /> },
             {
                 path: "/unauthorized",
@@ -79,6 +94,7 @@ const router = createBrowserRouter([
                 ),
             },
 
+            // 🔐 Routes reserved ONLY for unauthenticated visitors
             {
                 element: <PublicOnlyGuard />,
                 children: [
@@ -87,6 +103,7 @@ const router = createBrowserRouter([
                 ],
             },
 
+            // 🧑‍🎓 Protected Student Routes
             {
                 element: <SecurityGuard allowedRoles={["ROLE_STUDENT"]} />,
                 children: [
@@ -98,6 +115,7 @@ const router = createBrowserRouter([
                 ],
             },
 
+            // 🧑‍🏫 Protected Teacher Routes
             {
                 element: <SecurityGuard allowedRoles={["ROLE_TEACHER"]} />,
                 children: [
@@ -106,6 +124,7 @@ const router = createBrowserRouter([
                 ],
             },
 
+            // 🛠️ Protected Admin Routes
             {
                 element: <SecurityGuard allowedRoles={["ROLE_ADMIN"]} />,
                 children: [

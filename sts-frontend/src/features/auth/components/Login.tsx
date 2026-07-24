@@ -3,10 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import z from "zod";
-import { authApi } from "../service/authApi";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FormInput from "@/components/layout/FormInput";
+import { authApi } from "../service/authApi";
 
 const loginSchema = z.object({
     emailOrName: z
