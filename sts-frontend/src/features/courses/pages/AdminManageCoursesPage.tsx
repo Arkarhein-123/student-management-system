@@ -255,8 +255,8 @@ export const AdminManageCoursePage: React.FC = () => {
                                         <Tag className="w-3 h-3 text-indigo-600" />
                                         {course.category}
                                     </div>
-                                    <div className="absolute top-3 right-3 bg-slate-900/80 text-white px-3 py-1 rounded-full text-xs font-bold font-mono shadow-xs">
-                                        ${Number(course.fees).toFixed(2)}
+                                    <div className="absolute top-3 right-3 bg-fuchsia-800 text-white px-3 py-1 rounded-full text-xs font-bold font-mono shadow-xs">
+                                        MMK {Number(course.fees).toFixed(2)}
                                     </div>
                                 </div>
 
