@@ -19,7 +19,8 @@ import {
 
 import { batchSchema, type BatchFormData, type AdminBatchResponse } from "../schemas/BatchSchema";
 import { batchApi, type TeacherOption } from "../services/BatchApi";
-import type { Course } from "@/types"; // Adjust import path if needed
+import { BatchStudentsModal } from "../components/BatchStudentsModal"; // Adjust path if necessary
+import type { Course } from "@/types";
 
 export const AdminManageBatchesPage: React.FC = () => {
     const [batches, setBatches] = useState<AdminBatchResponse[]>([]);
@@ -28,8 +29,14 @@ export const AdminManageBatchesPage: React.FC = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Batch Form Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBatchId, setEditingBatchId] = useState<number | null>(null);
+
+    // Dedicated Batch Students Modal State
+    const [isStudentsModalOpen, setIsStudentsModalOpen] = useState(false);
+    const [selectedBatchForStudents, setSelectedBatchForStudents] = useState<AdminBatchResponse | null>(null);
 
     const {
         register,
@@ -47,7 +54,6 @@ export const AdminManageBatchesPage: React.FC = () => {
         },
     });
 
-    // Centralized fetch via batchApi
     const loadData = async () => {
         setIsLoading(true);
         try {
@@ -71,6 +77,7 @@ export const AdminManageBatchesPage: React.FC = () => {
         loadData();
     }, []);
 
+    // Form Modal Handlers
     const handleOpenModal = (batch?: AdminBatchResponse) => {
         if (batch) {
             setEditingBatchId(batch.id);
@@ -139,6 +146,12 @@ export const AdminManageBatchesPage: React.FC = () => {
         } catch (error) {
             console.error("Failed to delete batch:", error);
         }
+    };
+
+    // View Students Handler (using BatchStudentsModal)
+    const handleOpenStudentsModal = (batch: AdminBatchResponse) => {
+        setSelectedBatchForStudents(batch);
+        setIsStudentsModalOpen(true);
     };
 
     const filteredBatches = batches.filter(
@@ -235,12 +248,15 @@ export const AdminManageBatchesPage: React.FC = () => {
                         </div>
 
                         <div className="px-6 py-4 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                                <Users className="w-4 h-4 text-slate-400" />
+                            <button
+                                onClick={() => handleOpenStudentsModal(batch)}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                            >
+                                <Users className="w-4 h-4" />
                                 <span>
                                     {batch.enrolledSeats} / {batch.maxSeats} Enrolled
                                 </span>
-                            </div>
+                            </button>
 
                             <div className="flex items-center gap-2">
                                 <button
@@ -261,7 +277,7 @@ export const AdminManageBatchesPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Modal */}
+            {/* Create / Edit Batch Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
                     <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-h-[90vh] flex flex-col">
@@ -355,7 +371,7 @@ export const AdminManageBatchesPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Start Date & Cohort Level Dropdown */}
+                            {/* Start Date & Cohort Level */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 mb-1">Start Date *</label>
@@ -436,6 +452,13 @@ export const AdminManageBatchesPage: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Separate Batch Students Modal Component */}
+            <BatchStudentsModal
+                isOpen={isStudentsModalOpen}
+                onClose={() => setIsStudentsModalOpen(false)}
+                batch={selectedBatchForStudents}
+            />
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import axiosClient from "@/config/axiosClient";
 import type { BatchFormData, AdminBatchResponse } from "@/features/batches/schemas/BatchSchema";
-import type { Course } from "@/types"; // Adjust import path if needed
+import type { BatchDetails, BatchStudentResponse, Course } from "@/types"; // Adjust import path if needed
 
 export interface TeacherOption {
     id: number;
@@ -29,8 +29,18 @@ export const batchApi = {
     },
 
     // GET /api/v1/admin/users/TEACHER
-    getTeachers: async (): Promise<TeacherOption[]> => {    
+    getTeachers: async (): Promise<TeacherOption[]> => {
         const response = await axiosClient.get<TeacherOption[]>("/admin/users/ROLE_TEACHER");
+        return response.data;
+    },
+
+    getBatchesByUserId: async (userId: number): Promise<BatchDetails[]> => {
+        const response = await axiosClient.get(`/batches/user/${userId}`);
+        return response.data;
+    },
+
+    getBatchStudents: async (batchId: number): Promise<BatchStudentResponse[]> => {
+        const response = await axiosClient.get<BatchStudentResponse[]>(`/batches/${batchId}/students`);
         return response.data;
     },
 

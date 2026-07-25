@@ -1,3 +1,4 @@
+
 export interface Course {
     id: number;
     courseName: string;
@@ -8,6 +9,8 @@ export interface Course {
     imageUrl: string;
     isAvailable: boolean;
 }
+
+
 
 export interface CourseCreateRequest {
     courseName: string;
@@ -50,6 +53,14 @@ export interface BatchDetails {
     studentEnrollmentStatus: "PENDING" | "APPROVED" | "DROPPED" | "Not Enrolled";
 }
 
+export interface BatchStudentResponse {
+    studentId: number;
+    name: string;
+    email: string;
+    enrollmentDate: string;
+    enrollmentStatus: "PENDING" | "APPROVED" | "DROPPED";
+}
+
 export interface CourseDetails {
     id: number;
     courseName: string;
@@ -60,7 +71,6 @@ export interface CourseDetails {
     imageUrl: string;
     batches: BatchDetails[];
 }
-
 
 // lesson dto
 export interface Lesson {

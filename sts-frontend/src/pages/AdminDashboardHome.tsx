@@ -1,107 +1,164 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Search,
-    Bell,
-    ChevronDown,
-    Briefcase,
-    PieChart,
-    Calendar,
     MoreHorizontal,
     ArrowUpRight,
-    ArrowDownRight,
     ArrowRight,
     TrendingUp,
-    Server,
-    Activity,
-    Clock,
+    Users,
+    BookOpen,
+    Layers,
+    Loader2,
+    RefreshCw,
+    UserCheck,
+    Mail,
+    Shield,
 } from "lucide-react";
+import type { Course } from "@/types";
+import type { AdminBatchResponse } from "@/features/batches/schemas/BatchSchema";
+import { batchApi, type TeacherOption } from "@/features/batches/services/BatchApi";
+
 
 // --- Types & Interfaces ---
-interface RecentActivity {
-    id: string;
-    user: string;
-    role: string;
-    action: string;
-    timestamp: string;
-    status: "success" | "warning" | "error";
-}
-
-interface SystemMetric {
+interface ActiveUserItem {
+    id: number | string;
     name: string;
-    value: number;
-    statusText: string;
-    color: string;
+    email: string;
+    role: "ROLE_ADMIN" | "ROLE_TEACHER" | "ROLE_STUDENT";
+    status: "Active" | "Idle" | "Offline";
+    lastActive: string;
 }
 
-// --- Mock Data ---
-const DUMMY_ROLE_DISTRIBUTION = [
-    { role: "Students", count: 1180, percentage: 94.5, color: "bg-emerald-500" },
-    { role: "Teachers", count: 42, percentage: 3.4, color: "bg-blue-500" },
-    { role: "Admins", count: 26, percentage: 2.1, color: "bg-purple-500" },
-];
+export const AdminDashboardHome: React.FC = () => {
+    const navigate = useNavigate();
 
-const DUMMY_ACTIVITIES: RecentActivity[] = [
-    {
-        id: "1",
-        user: "Sarah Jenkins",
-        role: "ROLE_TEACHER",
-        action: "Created new course module 'Advanced Mathematics'",
-        timestamp: "5 mins ago",
-        status: "success",
-    },
-    {
-        id: "2",
-        user: "Michael Scott",
-        role: "ROLE_STUDENT",
-        action: "Failed login attempt (Incorrect password x3)",
-        timestamp: "12 mins ago",
-        status: "warning",
-    },
-    {
-        id: "3",
-        user: "Admin System",
-        role: "ROLE_ADMIN",
-        action: "Updated role permissions for 'ROLE_TEACHER'",
-        timestamp: "1 hour ago",
-        status: "success",
-    },
-    {
-        id: "4",
-        user: "David Miller",
-        role: "ROLE_STUDENT",
-        action: "Account suspended due to policy violation",
-        timestamp: "2 hours ago",
-        status: "error",
-    },
-    {
-        id: "5",
-        user: "Elena Rostova",
-        role: "ROLE_TEACHER",
-        action: "Uploaded new assignment resources",
-        timestamp: "3 hours ago",
-        status: "success",
-    },
-];
+    // Data States
+    const [batches, setBatches] = useState<AdminBatchResponse[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [teachers, setTeachers] = useState<TeacherOption[]>([]);
 
-const DUMMY_METRICS: SystemMetric[] = [
-    { name: "CPU Utilization", value: 38, statusText: "Normal Load", color: "bg-indigo-500" },
-    { name: "Database Connections", value: 64, statusText: "128 / 200 Pool", color: "bg-blue-500" },
-    { name: "Memory Usage", value: 82, statusText: "High Memory", color: "bg-amber-500" },
-];
-
-export const AdminDashboardPage: React.FC = () => {
+    const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
+    // Fetch dashboard real metrics from API
+    const loadDashboardData = async () => {
+        setIsLoading(true);
+        try {
+            const [batchesData, coursesData, teachersData] = await Promise.all([
+                batchApi.getAllBatches(),
+                batchApi.getCourses(),
+                batchApi.getTeachers(),
+            ]);
+
+            setBatches(batchesData);
+            setCourses(coursesData);
+            setTeachers(teachersData);
+        } catch (error) {
+            console.error("Failed to load dashboard metrics:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadDashboardData();
+    }, []);
+
+    // Derived Statistics
+    const totalBatches = batches.length;
+    const totalCourses = courses.length;
+    const totalTeachers = teachers.length;
+
+    // Sum total enrolled students across all active batches
+    const totalEnrolledStudents = batches.reduce((acc, batch) => acc + (batch.enrolledSeats || 0), 0);
+    const totalMaxCapacity = batches.reduce((acc, batch) => acc + (batch.maxSeats || 0), 0);
+    const overallCapacityPercentage =
+        totalMaxCapacity > 0 ? Math.round((totalEnrolledStudents / totalMaxCapacity) * 100) : 0;
+
+    // Calculated Role Distribution
+    const totalUsers = totalEnrolledStudents + totalTeachers + 1; // +1 for current Admin
+    const roleDistribution = [
+        {
+            role: "Students",
+            count: totalEnrolledStudents,
+            percentage: totalUsers > 0 ? ((totalEnrolledStudents / totalUsers) * 100).toFixed(1) : "0",
+            color: "bg-emerald-500",
+        },
+        {
+            role: "Teachers",
+            count: totalTeachers,
+            percentage: totalUsers > 0 ? ((totalTeachers / totalUsers) * 100).toFixed(1) : "0",
+            color: "bg-blue-500",
+        },
+        {
+            role: "Admins",
+            count: 1,
+            percentage: totalUsers > 0 ? ((1 / totalUsers) * 100).toFixed(1) : "0",
+            color: "bg-purple-500",
+        },
+    ];
+
+    // Combine fetched teacher API data + platform admin safely
+    const activeUsersList: ActiveUserItem[] = [
+        {
+            id: "admin-1",
+            name: "System Administrator",
+            email: "admin@platform.com",
+            role: "ROLE_ADMIN",
+            status: "Active",
+            lastActive: "Now",
+        },
+        ...teachers.map((t) => {
+            const teacherName = t.name ?? "Unknown Teacher";
+            const sanitizedEmailName = teacherName.toLowerCase().replace(/\s+/g, ".");
+
+            return {
+                id: t.id,
+                name: teacherName,
+                email: `${sanitizedEmailName}@faculty.edu`,
+                role: "ROLE_TEACHER" as const,
+                status: "Active" as const,
+                lastActive: "Online",
+            };
+        }),
+    ];
+
+    // Filter Active Users List
+    const filteredUsers = activeUsersList.filter(
+        (user) =>
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.status.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    if (isLoading) {
+        return (
+            <div className="flex h-[80vh] items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            </div>
+        );
+    }
+
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-4">
-            {/* Pastel Metric Cards */}
+        <div className="p-8 max-w-7xl mx-auto space-y-6 min-h-screen bg-slate-50/50">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Overview</h1>
+                <p className="text-xs text-slate-500 mt-1">
+                    Real-time system overview, batch allocations, and active user management.
+                </p>
+            </div>
+
+            {/* Top Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* 1. Course Progress Card (Pastel Yellow) */}
+                {/* Active Cohorts / Batches Card */}
                 <div className="bg-[#FFF886] p-6 rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Briefcase className="w-4 h-4 text-slate-900" />
-                            <span className="text-sm font-bold text-slate-900">Course Progress</span>
+                            <Layers className="w-4 h-4 text-slate-900" />
+                            <span className="text-sm font-bold text-slate-900">Active Cohorts</span>
                         </div>
                         <button className="p-1.5 bg-white/50 hover:bg-white/80 rounded-full transition cursor-pointer">
                             <MoreHorizontal className="w-4 h-4 text-slate-700" />
@@ -109,28 +166,31 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-extrabold text-slate-900 font-mono">75%</span>
+                        <span className="text-3xl font-extrabold text-slate-900 font-mono">{totalBatches}</span>
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white rounded-full text-xs font-bold text-slate-800 shadow-xs">
                             <ArrowUpRight className="w-3 h-3 text-emerald-500 fill-emerald-500" />
-                            12%
+                            Live
                         </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                        <span className="text-xs font-medium text-slate-700">22 out of 64 classes</span>
-                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer">
-                            See Details
+                        <span className="text-xs font-medium text-slate-700">{totalCourses} Active Courses</span>
+                        <button
+                            onClick={() => navigate("/admin/batches")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer"
+                        >
+                            Manage Batches
                             <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 </div>
 
-                {/* 2. Attendance Rate Card (Pastel Pink) */}
+                {/* Enrolled Students Card */}
                 <div className="bg-[#FFE0E2] p-6 rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <PieChart className="w-4 h-4 text-slate-900" />
-                            <span className="text-sm font-bold text-slate-900">Attendance Rate</span>
+                            <Users className="w-4 h-4 text-slate-900" />
+                            <span className="text-sm font-bold text-slate-900">Enrolled Students</span>
                         </div>
                         <button className="p-1.5 bg-white/50 hover:bg-white/80 rounded-full transition cursor-pointer">
                             <MoreHorizontal className="w-4 h-4 text-slate-700" />
@@ -138,28 +198,33 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-extrabold text-slate-900 font-mono">92%</span>
+                        <span className="text-3xl font-extrabold text-slate-900 font-mono">
+                            {totalEnrolledStudents}
+                        </span>
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white rounded-full text-xs font-bold text-slate-800 shadow-xs">
-                            <ArrowDownRight className="w-3 h-3 text-rose-500 fill-rose-500" />
-                            02%
+                            <ArrowUpRight className="w-3 h-3 text-emerald-500 fill-emerald-500" />
+                            {overallCapacityPercentage}% Cap
                         </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                        <span className="text-xs font-medium text-slate-700">Based on total student</span>
-                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer">
-                            See Details
+                        <span className="text-xs font-medium text-slate-700">Out of {totalMaxCapacity} Seats</span>
+                        <button
+                            onClick={() => navigate("/admin/enrollments")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer"
+                        >
+                            View Enrollments
                             <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 </div>
 
-                {/* 3. Assignments Card (Pastel Lavender) */}
+                {/* Academic Faculty Card */}
                 <div className="bg-[#EFE8FF] p-6 rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-slate-900" />
-                            <span className="text-sm font-bold text-slate-900">Assignments</span>
+                            <BookOpen className="w-4 h-4 text-slate-900" />
+                            <span className="text-sm font-bold text-slate-900">Academic Faculty</span>
                         </div>
                         <button className="p-1.5 bg-white/50 hover:bg-white/80 rounded-full transition cursor-pointer">
                             <MoreHorizontal className="w-4 h-4 text-slate-700" />
@@ -167,165 +232,157 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-extrabold text-slate-900 font-mono">64%</span>
+                        <span className="text-3xl font-extrabold text-slate-900 font-mono">{totalTeachers}</span>
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white rounded-full text-xs font-bold text-slate-800 shadow-xs">
-                            <ArrowUpRight className="w-3 h-3 text-emerald-500 fill-emerald-500" />
-                            18%
+                            Active
                         </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                        <span className="text-xs font-medium text-slate-700">Based on recent task</span>
-                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer">
-                            See Details
+                        <span className="text-xs font-medium text-slate-700">Assigned across batches</span>
+                        <button
+                            onClick={() => navigate("/admin/teachers")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-xs font-semibold text-slate-800 rounded-full shadow-xs hover:bg-slate-50 transition cursor-pointer"
+                        >
+                            Teacher Directory
                             <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Middle Grid: Role Breakdown & System Metrics */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* User Role Distribution */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-indigo-600" />
-                            Role Distribution
-                        </h2>
-                        <span className="text-xs font-medium text-slate-400">Total: 1,248</span>
-                    </div>
-
-                    <p className="text-xs text-slate-500">Overview of registered accounts by assigned role.</p>
-
-                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
-                        {DUMMY_ROLE_DISTRIBUTION.map((item, idx) => (
-                            <div
-                                key={idx}
-                                style={{ width: `${item.percentage}%` }}
-                                className={`${item.color} h-full`}
-                                title={`${item.role}: ${item.count}`}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="space-y-2.5 pt-2">
-                        {DUMMY_ROLE_DISTRIBUTION.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-2">
-                                    <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                                    <span className="font-medium text-slate-700">{item.role}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="font-mono text-slate-500">{item.count}</span>
-                                    <span className="font-semibold text-slate-800 w-12 text-right">
-                                        {item.percentage}%
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            {/* Role Distribution Section */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-indigo-600" />
+                        Platform User Distribution
+                    </h2>
+                    <span className="text-xs font-mono font-medium text-slate-400">
+                        Total System Users: {totalUsers}
+                    </span>
                 </div>
 
-                {/* System Metrics */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                            <Server className="w-4 h-4 text-indigo-600" />
-                            System Health & Metrics
-                        </h2>
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            All Services Operational
-                        </span>
-                    </div>
+                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                    {roleDistribution.map((item, idx) => (
+                        <div
+                            key={idx}
+                            style={{ width: `${item.percentage}%` }}
+                            className={`${item.color} h-full transition-all duration-300`}
+                            title={`${item.role}: ${item.count}`}
+                        />
+                    ))}
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        {DUMMY_METRICS.map((metric, idx) => (
-                            <div key={idx} className="p-4 bg-slate-50/70 border border-slate-100 rounded-xl space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-semibold text-slate-600">{metric.name}</span>
-                                    <span className="text-xs font-mono font-bold text-slate-800">{metric.value}%</span>
-                                </div>
-                                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full ${metric.color} transition-all duration-500`}
-                                        style={{ width: `${metric.value}%` }}
-                                    />
-                                </div>
-                                <span className="text-[11px] text-slate-400 font-medium block">
-                                    {metric.statusText}
-                                </span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    {roleDistribution.map((item, idx) => (
+                        <div
+                            key={idx}
+                            className="flex items-center justify-between p-3 bg-slate-50/70 border border-slate-100 rounded-2xl text-xs"
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                                <span className="font-medium text-slate-700">{item.role}</span>
                             </div>
-                        ))}
-                    </div>
+                            <div className="flex items-center gap-3">
+                                <span className="font-mono text-slate-500">{item.count}</span>
+                                <span className="font-bold text-slate-800 w-12 text-right">{item.percentage}%</span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Security Audit Table */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            {/* Active Users Table */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
+                {/* Active Platform Directory Header with Search & Refresh */}
+                <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-indigo-600" />
-                            Recent Activity Logs
+                            <UserCheck className="w-4 h-4 text-indigo-600" />
+                            Active Platform Directory
                         </h2>
-                        <p className="text-xs text-slate-500 mt-0.5">Real-time view of platform actions.</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Live list of registered faculty and administrative accounts.
+                        </p>
                     </div>
-                    <button className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
-                        View Audit Logs &rarr;
-                    </button>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <button
+                            onClick={loadDashboardData}
+                            className="p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer shadow-xs"
+                            title="Refresh Data"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                        </button>
+                        <div className="relative w-full sm:w-64">
+                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search active users..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                <th className="py-3.5 px-6">User</th>
+                            <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th className="py-3.5 px-6">User / Name</th>
+                                <th className="py-3.5 px-6">Email Contact</th>
                                 <th className="py-3.5 px-6">Role</th>
-                                <th className="py-3.5 px-6">Action / Event</th>
-                                <th className="py-3.5 px-6 text-right">Time</th>
+                                <th className="py-3.5 px-6 text-right">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
-                            {DUMMY_ACTIVITIES.map((activity) => (
-                                <tr key={activity.id} className="hover:bg-slate-50/60 transition">
-                                    <td className="py-4 px-6 font-semibold text-slate-800">{activity.user}</td>
-                                    <td className="py-4 px-6">
-                                        <span
-                                            className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold border ${
-                                                activity.role === "ROLE_ADMIN"
-                                                    ? "bg-purple-50 text-purple-700 border-purple-200"
-                                                    : activity.role === "ROLE_TEACHER"
-                                                      ? "bg-blue-50 text-blue-700 border-blue-200"
-                                                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                            }`}
-                                        >
-                                            {activity.role}
-                                        </span>
-                                    </td>
-                                    <td className="py-4 px-6 text-slate-600">
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className={`w-2 h-2 rounded-full ${
-                                                    activity.status === "success"
-                                                        ? "bg-emerald-500"
-                                                        : activity.status === "warning"
-                                                          ? "bg-amber-500"
-                                                          : "bg-rose-500"
-                                                }`}
-                                            />
-                                            {activity.action}
-                                        </div>
-                                    </td>
-                                    <td className="py-4 px-6 text-right text-slate-400 text-xs font-mono">
-                                        <div className="inline-flex items-center gap-1">
-                                            <Clock className="w-3 h-3 text-slate-300" />
-                                            {activity.timestamp}
-                                        </div>
+                            {filteredUsers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="py-8 text-center text-xs text-slate-400 font-medium">
+                                        No active users found matching "{searchQuery}"
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredUsers.map((user) => (
+                                    <tr key={user.id} className="hover:bg-slate-50/60 transition">
+                                        <td className="py-4 px-6 font-semibold text-slate-800 flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-indigo-600">
+                                                {user.name.charAt(0)}
+                                            </div>
+                                            {user.name}
+                                        </td>
+                                        <td className="py-4 px-6 text-slate-600 text-xs font-medium">
+                                            <div className="flex items-center gap-1.5 text-slate-500">
+                                                <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                                {user.email}
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                            <span
+                                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                                    user.role === "ROLE_ADMIN"
+                                                        ? "bg-purple-50 text-purple-700 border-purple-200"
+                                                        : user.role === "ROLE_TEACHER"
+                                                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                                                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                                }`}
+                                            >
+                                                <Shield className="w-3 h-3" />
+                                                {user.role.replace("ROLE_", "")}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6 text-right">
+                                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                {user.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -334,4 +391,4 @@ export const AdminDashboardPage: React.FC = () => {
     );
 };
 
-export default AdminDashboardPage;
+export default AdminDashboardHome;
