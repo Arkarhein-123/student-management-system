@@ -87,7 +87,7 @@ Ensure you have the following installed locally:
 
 #### MySQL Database
 
-Create a database named `jdc_smd_db`:
+Create a database named `jdc_sms_db`:
 
 ```sql
 CREATE DATABASE jdc_sms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
