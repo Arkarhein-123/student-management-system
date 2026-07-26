@@ -15,13 +15,13 @@ An industrial-grade, full-stack Student Management System designed for scalable 
 * **Form Handling & Validation:** React Hook Form, Zod 4
 * **Styling & Components:** Tailwind CSS v4, Base UI, Shadcn UI, Lucide Icons
 * **HTTP Client:** Axios (With Centralized Bearer Interceptors)
+* **image Storage:** Supabase Storage API (for avatars, course materials, and asset uploads)
 * **Code Quality:** Oxlint
 
 ### Backend & Cloud
 * **Core Framework:** Spring Boot 3.x (Java 25)
 * **Security:** Spring Security (JWT-based Stateless Authentication & RBAC)
 * **ORM & Database:** Spring Data JPA / Hibernate, MySQL 8
-* **Object Storage:** Supabase Storage API (for avatars, course materials, and asset uploads)
 * **Build Tool:** Apache Maven
 
 ---
@@ -90,14 +90,14 @@ Ensure you have the following installed locally:
 Create a database named `jdc_smd_db`:
 
 ```sql
-CREATE DATABASE jdc_portal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE jdc_sms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ```
 
 #### Supabase Storage
 
 1. Log into your Supabase Dashboard and create a new project.
-2. Go to **Storage** and create a public bucket named `jdc-assets`.
+2. Go to **Storage** and create a public bucket named `jdc_sms_course_img`.
 3. Obtain your **Supabase Project URL** and **API Key / Secret Key** from Project Settings -> API.
 
 ---
@@ -163,7 +163,6 @@ cd ../frontend
 2. **Configure Environment Variables:**
 Create a `.env` file in the `frontend/` root:
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api/v1
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 
@@ -198,9 +197,6 @@ npm run build
 
 ```
 
-
-
----
 
 ## 📄 License
 
