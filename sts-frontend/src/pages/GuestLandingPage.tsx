@@ -1,11 +1,28 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, GraduationCap, ShieldCheck, Milestone, BookOpen, Users, Trophy, Laptop, Star } from "lucide-react";
+import { useState } from "react";
+import {
+    ArrowRight,
+    GraduationCap,
+    ShieldCheck,
+    Milestone,
+    BookOpen,
+    Users,
+    Trophy,
+    Laptop,
+    Star,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Login from "@/features/auth/components/Login";
+import Register from "@/features/auth/components/Register";
 
 export default function GuestLandingPage() {
+    // Track which modal is currently active: "login", "register", or null (closed)
+    const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
+        null,
+    );
+
     return (
         <div className="w-full min-h-screen bg-slate-50 font-sans selection:bg-blue-500/20 selection:text-blue-900">
-            {/* 🎯 Section A: Hero Panel (Fixed High-Contrast Light Theme) */}
+            {/* 🎯 Section A: Hero Panel */}
             <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-slate-50 text-slate-900 border-b border-slate-200/80">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none" />
 
@@ -26,25 +43,30 @@ export default function GuestLandingPage() {
                             </h1>
 
                             <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-normal">
-                                Learn Full Stack Development, Java Enterprise, Mobile Apps, UI/UX Design, and AI from
-                                experienced mentors through practical, high-performance project architectures.
+                                Learn Full Stack Development, Java Enterprise,
+                                Mobile Apps, UI/UX Design, and AI from
+                                experienced mentors through practical,
+                                high-performance project architectures.
                             </p>
 
                             <div className="flex flex-wrap gap-4 pt-4">
-                                <Link to="/register">
-                                    <Button className="h-12 px-8 bg-blue-600 hover:bg-white hover:text-blue-600 text-white font-bold text-sm shadow-md shadow-blue-600/10  transition-all ease-in-out active:scale-98 cursor-pointer rounded-xl gap-2">
-                                        Start Learning <ArrowRight className="h-4 w-4" />
-                                    </Button>
-                                </Link>
+                                {/* Open Register Modal */}
+                                <Button
+                                    onClick={() => setActiveModal("register")}
+                                    className="h-12 px-8 bg-blue-600 hover:bg-white hover:text-blue-600 text-white font-bold text-sm shadow-md shadow-blue-600/10 transition-all ease-in-out active:scale-98 cursor-pointer rounded-xl gap-2"
+                                >
+                                    Start Learning{" "}
+                                    <ArrowRight className="h-4 w-4" />
+                                </Button>
 
-                                <Link to="/login">
-                                    <Button
-                                        variant="outline"
-                                        className="h-12 px-8 border-slate-400 bg-white hover:bg-blue-600 hover:text-white text-blue-600 font-bold text-sm  transition-all ease-in-out rounded-xl cursor-pointer shadow-xs"
-                                    >
-                                        Student Login
-                                    </Button>
-                                </Link>
+                                {/* Open Login Modal */}
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setActiveModal("login")}
+                                    className="h-12 px-8 border-slate-400 bg-white hover:bg-blue-600 hover:text-white text-blue-600 font-bold text-sm transition-all ease-in-out rounded-xl cursor-pointer shadow-xs"
+                                >
+                                    Student Login
+                                </Button>
                             </div>
                         </div>
 
@@ -117,41 +139,51 @@ export default function GuestLandingPage() {
                             Why Learn With JDC Academy?
                         </h2>
                         <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-                            Engineered for tech professionals who need verified skills, modern architectural execution,
-                            and true career paths.
+                            Engineered for tech professionals who need verified
+                            skills, modern architectural execution, and true
+                            career paths.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-blue-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80 bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-blue-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <GraduationCap className="w-6 h-6" />
                             </div>
-                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">Industry Mentors</h3>
+                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">
+                                Industry Mentors
+                            </h3>
                             <p className="mt-3 text-slate-500 text-sm leading-relaxed">
-                                Learn directly from active staff engineers and system architects with proven
-                                field-tested codebase records.
+                                Learn directly from active staff engineers and
+                                system architects with proven field-tested
+                                codebase records.
                             </p>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-emerald-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80 bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-emerald-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <ShieldCheck className="w-6 h-6" />
                             </div>
-                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">Global Certification</h3>
+                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">
+                                Global Certification
+                            </h3>
                             <p className="mt-3 text-slate-500 text-sm leading-relaxed">
-                                Graduate with cryptographically secure, recognized credentials tailored to pass
+                                Graduate with cryptographically secure,
+                                recognized credentials tailored to pass
                                 automated recruiter screeners.
                             </p>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200/80  bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-purple-200 transition duration-300 group">
+                        <div className="rounded-2xl border border-slate-200/80 bg-slate-200 p-8 hover:shadow-xl hover:shadow-slate-100 hover:border-purple-200 transition duration-300 group">
                             <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
                                 <Milestone className="w-6 h-6" />
                             </div>
-                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">Production Standards</h3>
+                            <h3 className="font-bold text-xl text-slate-900 tracking-tight">
+                                Production Standards
+                            </h3>
                             <p className="mt-3 text-slate-500 text-sm leading-relaxed">
-                                Build real portfolio assets using modern toolings like Vite, Zustand stores, and
+                                Build real portfolio assets using modern
+                                toolings like Vite, Zustand stores, and
                                 asynchronous API layers.
                             </p>
                         </div>
@@ -191,15 +223,24 @@ export default function GuestLandingPage() {
                                 <div className="space-y-4">
                                     <div className="flex gap-1">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                            <Star
+                                                key={i}
+                                                className="w-4 h-4 fill-amber-400 text-amber-400"
+                                            />
                                         ))}
                                     </div>
-                                    <p className="text-slate-600 text-sm leading-relaxed italic">"{item.quote}"</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed italic">
+                                        "{item.quote}"
+                                    </p>
                                 </div>
 
                                 <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col">
-                                    <span className="font-bold text-slate-900 text-sm">{item.name}</span>
-                                    <span className="text-xs text-slate-400 font-medium mt-0.5">{item.role}</span>
+                                    <span className="font-bold text-slate-900 text-sm">
+                                        {item.name}
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-medium mt-0.5">
+                                        {item.role}
+                                    </span>
                                 </div>
                             </div>
                         ))}
@@ -207,7 +248,7 @@ export default function GuestLandingPage() {
                 </div>
             </section>
 
-            {/* 🚀 Section D: Clean Enterprise CTA Banner (Fixed Light Context Text Contrast from image_44e729.jpg) */}
+            {/* 🚀 Section D: Clean Enterprise CTA Banner */}
             <section className="bg-white py-16 px-6 lg:px-12">
                 <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-xl shadow-blue-600/20">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none" />
@@ -216,21 +257,55 @@ export default function GuestLandingPage() {
                         <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                             Ready to Start Your Journey?
                         </h2>
-                        {/* High-visibility stark white text for the CTA description paragraph */}
                         <p className="text-sm sm:text-base text-blue-50 leading-relaxed max-w-md mx-auto font-medium">
-                            Join thousands of candidates running our verified software framework modules inside JDC
-                            Academy.
+                            Join thousands of candidates running our verified
+                            software framework modules inside JDC Academy.
                         </p>
                         <div className="pt-2">
-                            <Link to="/register">
-                                <Button className="bg-white hover:bg-slate-50 text-blue-600 font-bold px-8 h-12 text-sm transition active:scale-98 cursor-pointer rounded-xl shadow-lg shadow-blue-950/20 gap-2">
-                                    Enroll Today <ArrowRight className="w-4 h-4" />
-                                </Button>
-                            </Link>
+                            <Button
+                                onClick={() => setActiveModal("register")}
+                                className="bg-white hover:bg-slate-50 text-blue-600 font-bold px-8 h-12 text-sm transition active:scale-98 cursor-pointer rounded-xl shadow-lg shadow-blue-950/20 gap-2"
+                            >
+                                Enroll Today <ArrowRight className="w-4 h-4" />
+                            </Button>
                         </div>
                     </div>
                 </div>
             </section>
+
+            {/* 🛡️ Modal Container Overlay */}
+            {activeModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+                    <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        {/* Close button overlay */}
+                        <button
+                            onClick={() => setActiveModal(null)}
+                            className="absolute top-4 right-4 z-10 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition cursor-pointer"
+                            aria-label="Close modal"
+                        >
+                            ✕
+                        </button>
+
+                        {/* Render Login Modal */}
+                        {activeModal === "login" && (
+                            <Login
+                                onClose={() => setActiveModal(null)}
+                                onSwitchToRegister={() =>
+                                    setActiveModal("register")
+                                }
+                            />
+                        )}
+
+                        {/* Render Register Modal */}
+                        {activeModal === "register" && (
+                            <Register
+                                onClose={() => setActiveModal(null)}
+                                onSwitchToLogin={() => setActiveModal("login")}
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
