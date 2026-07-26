@@ -1,4 +1,3 @@
-Here is the complete, raw **`README.md`** text wrapped in a single markdown code block so you can easily copy and paste it straight into your `README.md` file:
 
 ```markdown
 # 🎓 Student Management System (JDC Portal)
