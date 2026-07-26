@@ -24,18 +24,18 @@ public class Enrollment {
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "batch_id",nullable = false)
+    @JoinColumn(name = "batch_id", nullable = false)
     private Batch batch;
 
     @Column(name = "enrollment_date", nullable = false)
-    private LocalDateTime enrollmentData;
+    private LocalDateTime enrollmentDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "enrollment_status",nullable = false)
     private EnrollmentStatus enrollmentStatus;
 
     @PrePersist
     protected void onCreate(){
-        this.enrollmentData = LocalDateTime.now();
+        this.enrollmentDate = LocalDateTime.now();
     }
 }

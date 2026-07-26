@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+
 @Entity
 @Getter
 @Setter
@@ -23,8 +24,16 @@ public class Course {
     private String description;
 
     @Column(name = "duration",nullable = false,length = 50)
-    private String duration;
+        private String duration;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal fees;
+
+    @Column(name = "image_url", nullable = false, length = 255)
+    private String imageUrl;
+
+    @Column(name = "category",nullable = false,length = 50)
+    private String category;
+
+
 }

@@ -1,4 +1,4 @@
-package org.jdc.portal.dto;
+package org.jdc.portal.dto.request;
 
 
 import jakarta.validation.constraints.Email;
@@ -19,6 +19,4 @@ public record RegisterRequest(
         @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
         String password
 ) {
-
-
 }

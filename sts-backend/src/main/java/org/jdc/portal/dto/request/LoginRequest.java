@@ -1,4 +1,4 @@
-package org.jdc.portal.dto;
+package org.jdc.portal.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -7,5 +7,4 @@ public record LoginRequest(
         String emailOrName,
         @NotBlank(message = "Password is required")
         String password
-) {
-}
+) {}
