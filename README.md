@@ -1,3 +1,4 @@
+Here is the updated `README.md` incorporating the account creation policy specifying that student accounts are created through the normal public registration flow while teacher accounts are strictly provisioned by system administrators.
 
 ```markdown
 # 🎓 Student Management System (JDC Portal)
@@ -15,7 +16,7 @@ An industrial-grade, full-stack Student Management System designed for scalable 
 * **Form Handling & Validation:** React Hook Form, Zod 4
 * **Styling & Components:** Tailwind CSS v4, Base UI, Shadcn UI, Lucide Icons
 * **HTTP Client:** Axios (With Centralized Bearer Interceptors)
-* **image Storage:** Supabase Storage API (for avatars, course materials, and asset uploads)
+* **Image Storage:** Supabase Storage API (for avatars, course materials, and asset uploads)
 * **Code Quality:** Oxlint
 
 ### Backend & Cloud
@@ -26,16 +27,20 @@ An industrial-grade, full-stack Student Management System designed for scalable 
 
 ---
 
-## 🔐 Role-Based Access Control (RBAC)
+## 🔐 Role-Based Access Control (RBAC) & Account Policy
 
 The application enforces fine-grained permissions across 4 distinct user roles:
 
 | Role | Access Scope |
 | :--- | :--- |
-| **Admin** | Full system administration, batch creation, course setup, global user management, database overrides. |
+| **Admin** | Full system administration, batch creation, course setup, global user management, database overrides, and teacher account provisioning. |
 | **Teacher** | Assigned batch management (`/batches/user/{userId}`), lesson creation/editing, recording link uploads, and batch roster monitoring. |
 | **Student** | Access to enrolled batch curriculum, lesson materials, video recordings, and individual enrollment status. |
-| **Guest / Unauthenticated** | Public course directory, landing page, registration, and login endpoints. |
+| **Guest / Unauthenticated** | Public course directory, landing page, public registration, and login endpoints. |
+
+### Account Creation Policy
+* **Student Accounts**: Can be registered directly by applicants using the public registration portal.
+* **Teacher Accounts**: Strictly provisioned and managed by system administrators via the internal administrative dashboard.
 
 ---
 
@@ -105,19 +110,21 @@ CREATE DATABASE jdc_sms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### 2. Backend Installation (Spring Boot)
 
 1. **Navigate to the backend directory:**
+
 ```bash
 cd backend
 
 ```
 
+2. **Configure Environment Properties (`src/main/resources/application.yml`):**
 
-2. **Configure Environment Properties:**
+```yaml
 # ===============================
 # Server Configuration
 # ===============================
 server.port=8080
-# ===============================
 
+# ===============================
 # Database Configuration
 # ===============================
 spring.datasource.url=jdbc:mysql://localhost:3306/jdc_sms_db
@@ -138,14 +145,13 @@ jwt.secret=YOUR_64_CHARACTER_LONG_SECURE_JWT_SECRET_KEY
 
 ```
 
-
 3. **Build and Run:**
+
 ```bash
 ./mvnw clean install
 ./mvnw spring-boot:run
 
 ```
-
 
 The backend API will start at `http://localhost:8080`.
 
@@ -154,53 +160,56 @@ The backend API will start at `http://localhost:8080`.
 ### 3. Frontend Installation (React 19)
 
 1. **Navigate to the frontend directory:**
+
 ```bash
 cd ../frontend
 
 ```
 
-
 2. **Configure Environment Variables:**
 Create a `.env` file in the `frontend/` root:
+
 ```env
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 
 ```
 
-
 3. **Install Dependencies:**
+
 ```bash
 npm install
 
 ```
 
-
 4. **Start Vite Development Server:**
+
 ```bash
 npm run dev
 
 ```
 
+---
+
 ## 🧪 Testing & Code Quality
 
 * **Frontend Linting (Oxlint):**
+
 ```bash
 npm run lint
 
 ```
 
-
 * **Frontend TypeScript Verification:**
+
 ```bash
 npm run build
 
 ```
 
-
 ## 📄 License
 
-This project is open-source and available under the [MIT License](https://www.google.com/search?q=LICENSE).
+This project is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
 
 ```
 
