@@ -1,4 +1,3 @@
-Here is the updated `README.md` incorporating the account creation policy specifying that student accounts are created through the normal public registration flow while teacher accounts are strictly provisioned by system administrators.
 
 ```markdown
 # 🎓 Student Management System (JDC Portal)
