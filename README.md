@@ -88,7 +88,7 @@ Ensure you have the following installed locally:
 
 #### MySQL Database
 
-Create a database named `jdc_portal_db`:
+Create a database named `jdc_smd_db`:
 
 ```sql
 CREATE DATABASE jdc_portal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -113,36 +113,29 @@ cd backend
 
 
 2. **Configure Environment Properties:**
-Create or edit `src/main/resources/application.yml`:
-```yaml
-server:
-  port: 8080
-  servlet:
-    context-path: /api/v1
+# ===============================
+# Server Configuration
+# ===============================
+server.port=8080
+# ===============================
 
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/jdc_portal_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: YOUR_MYSQL_USERNAME
-    password: YOUR_MYSQL_PASSWORD
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+# Database Configuration
+# ===============================
+spring.datasource.url=jdbc:mysql://localhost:3306/jdc_sms_db
+spring.datasource.username=YOUR_MYSQL_USERNAME
+spring.datasource.password=YOUR_MYSQL_PASSWORD
 
-# Supabase Storage Configuration
-supabase:
-  url: https://YOUR_PROJECT_ID.supabase.co
-  key: YOUR_SUPABASE_SERVICE_KEY
-  bucket-name: jdc-assets
+# ===============================
+# JPA / Hibernate Configuration
+# ===============================
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
-# JWT Security Config
-jwt:
-  secret: YOUR_64_CHARACTER_LONG_SECURE_JWT_SECRET_KEY
-  expiration: 86400000 # 24 Hours in ms
+# ===============================
+# JWT Security Configuration
+# ===============================
+jwt.secret=YOUR_64_CHARACTER_LONG_SECURE_JWT_SECRET_KEY
 
 ```
 
@@ -155,7 +148,7 @@ jwt:
 ```
 
 
-The backend API will start at `http://localhost:8080/api/v1`.
+The backend API will start at `http://localhost:8080`.
 
 ---
 
@@ -190,54 +183,6 @@ npm install
 npm run dev
 
 ```
-
-
-The frontend will be accessible at `http://localhost:5173`.
-
----
-
-## 📡 API Reference
-
-### 🔑 Authentication & Authorization
-
-| Method | Endpoint | Description | Auth Required |
-| --- | --- | --- | --- |
-| `POST` | `/auth/login` | Authenticate user & receive JWT token + role (`userRole`) | ❌ Public |
-| `POST` | `/auth/register` | Register a new student account | ❌ Public |
-| `GET` | `/auth/me` | Fetch current user session details | 🔒 Token |
-
----
-
-### 🎓 Batches (`/batches`)
-
-| Method | Endpoint | Description | Permitted Roles |
-| --- | --- | --- | --- |
-| `GET` | `/batches` | Retrieve all active batches | Admin, Teacher, Student |
-| `GET` | `/batches/user/{userId}` | Fetch batches assigned to a specific instructor/student | Admin, Teacher |
-| `GET` | `/batches/{batchId}/students` | Get list of enrolled students (Roster view) | Admin, Teacher |
-| `POST` | `/batches` | Create a new cohort batch | Admin |
-| `PUT` | `/batches/{id}` | Update batch schedules or assign instructor | Admin |
-
----
-
-### 📚 Lessons & Content (`/lessons`)
-
-| Method | Endpoint | Description | Permitted Roles |
-| --- | --- | --- | --- |
-| `GET` | `/lessons/batch/{batchId}` | Get curriculum/lessons for a specific batch | Admin, Teacher, Student |
-| `POST` | `/lessons` | Create a new lesson entry | Admin, Teacher |
-| `PUT` | `/lessons/{id}` | Update lesson details or attach recording/materials link | Admin, Teacher |
-| `DELETE` | `/lessons/{id}` | Remove a lesson | Admin, Teacher |
-
----
-
-### 🖼️ Storage & Uploads (`/storage`)
-
-| Method | Endpoint | Description | Permitted Roles |
-| --- | --- | --- | --- |
-| `POST` | `/storage/upload` | Upload profile image or course asset to Supabase Bucket | Authenticated |
-
----
 
 ## 🧪 Testing & Code Quality
 
