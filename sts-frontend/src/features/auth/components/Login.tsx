@@ -33,11 +33,11 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginModalProps {
-    onClose: () => void;
-    onSwitchToRegister: () => void;
+    onClose?: () => void;
+    onSwitchToRegister?: () => void;
 }
 
-export default function Login({ onClose, onSwitchToRegister }: LoginModalProps) {
+export default function Login({ onClose = () => {}, onSwitchToRegister = () => {} }: LoginModalProps) {
     const navigate = useNavigate();
     const setAuthSuccess = useAuthStore((state) => state.setAuthSuccess);
     const {

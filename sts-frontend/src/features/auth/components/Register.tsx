@@ -6,28 +6,33 @@ import { Button } from "@/components/ui/button";
 import FormInput from "@/components/layout/FormInput";
 import { authApi } from "../service/authApi";
 
-const registerSchema = z.object({
-    name: z.string().min(8, "Full Name must be at least 8 character").max(150, "Name can't exceed 150 characters."),
-    email: z
-        .string()
-        .min(1, "Email is required")
-        .email("Provide a valid email format")
-        .max(150, "Email cannot exceed 150 characters"),
-    password: z
-        .string()
-        .min(8, "Password must be at least 8 characters")
-        .max(255, "Password cannot exceed 255 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-});
+const registerSchema = z
+    .object({
+        name: z.string().min(8, "Full Name must be at least 8 character").max(150, "Name can't exceed 150 characters."),
+        email: z
+            .string()
+            .min(1, "Email is required")
+            .email("Provide a valid email format")
+            .max(150, "Email cannot exceed 150 characters"),
+        password: z
+            .string()
+            .min(8, "Password must be at least 8 characters")
+            .max(255, "Password cannot exceed 255 characters"),
+        confirmPassword: z.string().min(1, "Please confirm your password"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+    });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface RegisterModalProps {
-    onClose: () => void;
-    onSwitchToLogin: () => void;
+    onClose?: () => void;
+    onSwitchToLogin?: () => void;
 }
 
-export default function Register({ onSwitchToLogin }: RegisterModalProps) {
+export default function Register({ onClose = () => {}, onSwitchToLogin = () => {} }: RegisterModalProps) {
     const {
         register,
         handleSubmit,
@@ -46,7 +51,8 @@ export default function Register({ onSwitchToLogin }: RegisterModalProps) {
     const onSubmit = async (data: RegisterFormValues) => {
         try {
             await authApi.register({ ...data });
-            onSwitchToLogin(); // Direct to login view upon successful registration
+            onClose();
+            onSwitchToLogin();
         } catch (error: any) {
             console.log("Registered Failed...", error);
             if (error.response?.status === 400 || error.response?.status === 409) {

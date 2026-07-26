@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate, RouterProvider, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { createBrowserRouter, Navigate, RouterProvider, Outlet, useNavigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 
 // Main Master Frame Layout
@@ -6,8 +7,6 @@ import RootLayout from "./components/layout/RootLayout";
 
 // Public Base Pages
 import GuestLandingPage from "./pages/GuestLandingPage";
-import Login from "./features/auth/components/Login";
-import Register from "./features/auth/components/Register";
 import UserProfileSettings from "./features/auth/pages/UserProfileSettings";
 
 // 🧑‍🎓 Student Workspace Pages
@@ -21,15 +20,19 @@ import ClassroomHubPage from "./features/classroom/pages/ClassroomHubPage";
 import TeacherDashboardHome from "./pages/TeacherDashboardHome";
 import TeacherBatchRosterPage from "./features/batches/pages/TeacherBatchRosterPage";
 
-// 🛠️ Admin Operational Hubs
+// 🛠️ Admin & Staff Operational Hubs
 import AdminDashboardHome from "./pages/AdminDashboardHome";
 import AdminManageCoursesPage from "./features/courses/pages/AdminManageCoursesPage";
 import AdminManageBatchesPage from "./features/batches/pages/AdminManageBatchesPage";
 import AdminManageEnrollmentsPage from "./features/enrollments/pages/AdminManageEnrollmentsPage";
 import { AdminManageUsersPage } from "./features/auth/pages/AdminManageUsersPage";
+import Login from "./features/auth/components/Login";
+import Register from "./features/auth/components/Register";
+
+// --- 🏷️ ROLE TYPE DEFINITION ---
+type UserRole = "ROLE_STUDENT" | "ROLE_TEACHER" | "ROLE_ADMIN" | "ROLE_STAFF";
 
 // --- 🏠 SMART ROOT INDEX COMPONENT ---
-// Redirects authenticated users to their home workspace, or renders Guest page for guests
 function RootIndex() {
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const userRole = useAuthStore((state) => state.userRole);
@@ -37,7 +40,7 @@ function RootIndex() {
     if (isLoggedIn) {
         if (userRole === "ROLE_STUDENT") return <Navigate to="/student" replace />;
         if (userRole === "ROLE_TEACHER") return <Navigate to="/teacher" replace />;
-        if (userRole === "ROLE_ADMIN") return <Navigate to="/admin" replace />;
+        if (userRole === "ROLE_ADMIN" || userRole === "ROLE_STAFF") return <Navigate to="/admin" replace />;
     }
 
     return <GuestLandingPage />;
@@ -45,7 +48,7 @@ function RootIndex() {
 
 // --- 🛡️ SECURE ROLE-GUARD WRAPPER COMPONENT ---
 interface GuardProps {
-    allowedRoles: Array<"ROLE_STUDENT" | "ROLE_TEACHER" | "ROLE_ADMIN">;
+    allowedRoles: UserRole[];
 }
 
 function SecurityGuard({ allowedRoles }: GuardProps) {
@@ -53,16 +56,15 @@ function SecurityGuard({ allowedRoles }: GuardProps) {
     const userRole = useAuthStore((state) => state.userRole);
 
     if (!isLoggedIn) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/" replace />;
     }
-    if (userRole && !allowedRoles.includes(userRole as any)) {
+    if (userRole && !allowedRoles.includes(userRole as UserRole)) {
         return <Navigate to="/unauthorized" replace />;
     }
     return <Outlet />;
 }
 
 // --- 🛡️ PUBLIC-ONLY SHIELD COMPONENT ---
-// Re-routes logged-in users back to their respective dashboards if they try to access /login or /register
 function PublicOnlyGuard() {
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const userRole = useAuthStore((state) => state.userRole);
@@ -70,20 +72,36 @@ function PublicOnlyGuard() {
     if (isLoggedIn) {
         if (userRole === "ROLE_STUDENT") return <Navigate to="/student" replace />;
         if (userRole === "ROLE_TEACHER") return <Navigate to="/teacher" replace />;
-        if (userRole === "ROLE_ADMIN") return <Navigate to="/admin" replace />;
+        if (userRole === "ROLE_ADMIN" || userRole === "ROLE_STAFF") return <Navigate to="/admin" replace />;
     }
 
     return <Outlet />;
 }
 
-// --- 🗺️ REGISTER ROUTING MATRIX TREE ---
+// --- 🚪 LOGOUT HANDLER COMPONENT ---
+function LogoutHandler() {
+    const logout = useAuthStore((state) => state.logout);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        logout();
+        navigate("/", { replace: true });
+    }, [logout, navigate]);
+
+    return null;
+}
+
+// --- 🗺️ ROUTING MATRIX MATRIX TREE ---
 const router = createBrowserRouter([
     {
         element: <RootLayout />,
         children: [
-            // 🌐 Public Routes open to all guests (RootIndex handles guest vs logged-in navigation)
+            // 🌐 Root Landing Page
             { path: "/", element: <RootIndex /> },
-            { path: "/profile", element: <UserProfileSettings /> },
+
+            // 🚪 Logout Handler (clears store and redirects to "/")
+            { path: "/logout", element: <LogoutHandler /> },
+
             {
                 path: "/unauthorized",
                 element: (
@@ -101,6 +119,12 @@ const router = createBrowserRouter([
                     { path: "/login", element: <Login /> },
                     { path: "/register", element: <Register /> },
                 ],
+            },
+
+            // 👤 Protected Profile Route (Accessible by any logged-in user)
+            {
+                element: <SecurityGuard allowedRoles={["ROLE_STUDENT", "ROLE_TEACHER", "ROLE_ADMIN", "ROLE_STAFF"]} />,
+                children: [{ path: "/profile", element: <UserProfileSettings /> }],
             },
 
             // 🧑‍🎓 Protected Student Routes
@@ -124,9 +148,9 @@ const router = createBrowserRouter([
                 ],
             },
 
-            // 🛠️ Protected Admin Routes
+            // 🛠️ Protected Admin & Staff Routes
             {
-                element: <SecurityGuard allowedRoles={["ROLE_ADMIN"]} />,
+                element: <SecurityGuard allowedRoles={["ROLE_ADMIN", "ROLE_STAFF"]} />,
                 children: [
                     { path: "/admin", element: <AdminDashboardHome /> },
                     { path: "/admin/courses", element: <AdminManageCoursesPage /> },
